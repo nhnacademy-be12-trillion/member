@@ -30,4 +30,7 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
+    - name: Run SonarQube
+      if: github.event_name == 'push'
+      run: mvn sonar:sonar -Dsonar.projectKey=hello-spring -Dsonar.host.url=${{secrets.SONAR_HOST}} -Dsonar.login=${{secrets.SONAR_TOKEN}}
 
