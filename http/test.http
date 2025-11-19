@@ -1,3 +1,4 @@
+### 회원가입
 POST localhost:8080/signup
 Content-Type: application/json
 
@@ -8,3 +9,16 @@ Content-Type: application/json
   "memberContact": "010-1234-5678",
   "memberBirth": "2000-01-01"
 }
+
+
+### 로그인
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "memberEmail": "test@nhn.com",
+  "memberPassword": "password1234"
+}
+
+### 재발급 요청
+POST http://localhost:8080/reissue

@@ -20,6 +20,10 @@ public class JWTUtil {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
+    public String getCategory(String token) {
+        return getClaims(token).get("category", String.class);
+    }
+
     private Claims getClaims(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
@@ -45,9 +49,10 @@ public class JWTUtil {
         }
     }
 
-    public String createJwt(String username, String role, Long expiredMs) {
+    public String createJwt(String category, String username, String role, Long expiredMs) {
         Date now = new Date();
         return Jwts.builder()
+                .claim("category",category)
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(now)
