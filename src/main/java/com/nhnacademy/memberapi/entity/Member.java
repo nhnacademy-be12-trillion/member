@@ -10,6 +10,7 @@ import lombok.*;
 @Entity
 @Table(name = "Member")
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -60,7 +61,15 @@ public class Member {
     @JoinColumn(name = "grade_id", nullable = false)
     private Grade grade;
 
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addresses = new ArrayList<>();
 
+    public static Member createForAuthentication(String username, MemberRole role){
+        Member member = new Member();
+        member.setMemberEmail(username);
+        member.setMemberPassword("temppassword"); // 어차피 사용되지 않을 임시 비밀번호
+        member.setMemberRole(role);
+        return member;
+    }
 }

@@ -1,0 +1,10 @@
+POST localhost:8080/signup
+Content-Type: application/json
+
+{
+  "memberEmail": "test@nhn.com",
+  "memberPassword": "password1234",
+  "memberName": "테스트",
+  "memberContact": "010-1234-5678",
+  "memberBirth": "2000-01-01"
+}

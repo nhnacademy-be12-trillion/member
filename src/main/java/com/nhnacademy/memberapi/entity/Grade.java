@@ -1,14 +1,14 @@
 package com.nhnacademy.memberapi.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 // 등급 정책
 @Entity
 @Table(name = "Grade")
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Grade {
 
