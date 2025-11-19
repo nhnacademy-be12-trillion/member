@@ -21,15 +21,14 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    // 회원가입
     @PostMapping("/signup")
     public ResponseEntity<Void> signup(@Valid @RequestBody MemberSignupRequest request) {
         memberService.signupMember(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    /**
-     * 로그인
-     */
+    // 로그인
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         // 서비스 호출
@@ -42,9 +41,8 @@ public class MemberController {
         return ResponseEntity.ok("Login Success");
     }
 
-    /**
-     * 재발급
-     */
+
+    // 토큰 재발급
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refresh = getRefreshTokenFromCookie(request);
@@ -64,9 +62,7 @@ public class MemberController {
         }
     }
 
-    /**
-     * 로그아웃
-     */
+    // 로그아웃
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         String refresh = getRefreshTokenFromCookie(request);

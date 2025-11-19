@@ -13,6 +13,6 @@ public class RefreshToken {
     @Id
     private String refreshToken;
 
-    private String username;
+    private Long memberId;
     private String role;
 }

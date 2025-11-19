@@ -1,5 +1,6 @@
 package com.nhnacademy.memberapi.service;
 
+import com.nhnacademy.memberapi.dto.CustomUserDetails;
 import com.nhnacademy.memberapi.dto.request.LoginRequest;
 import com.nhnacademy.memberapi.dto.request.MemberSignupRequest;
 import com.nhnacademy.memberapi.dto.response.TokenResponse;
@@ -11,6 +12,7 @@ import com.nhnacademy.memberapi.repository.MemberRepository;
 import com.nhnacademy.memberapi.repository.RefreshTokenRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,6 +26,7 @@ import java.util.Iterator;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -32,16 +35,6 @@ public class MemberService {
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JWTUtil jwtUtil;
-
-
-    public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder, GradeRepository gradeRepository, AuthenticationManager authenticationManager, RefreshTokenRepository refreshTokenRepository, JWTUtil jwtUtil) {
-        this.memberRepository = memberRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.gradeRepository = gradeRepository;
-        this.authenticationManager = authenticationManager;
-        this.refreshTokenRepository = refreshTokenRepository;
-        this.jwtUtil = jwtUtil;
-    }
 
     // 회원가입
     public void signupMember(MemberSignupRequest request) {
@@ -76,24 +69,27 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    // 1. 로그인 로직
+    // 로그인
     @Transactional
     public TokenResponse login(LoginRequest request) {
-        // 인증 수행
+        // 인증 수행. Spring Security가 DTO의 memberEmail을 'Username'으로 사용하여 인증을 시도
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(request.memberEmail(), request.memberPassword());
 
-        // 여기서 CustomUserDetailsService가 호출되어 DB 검증이 일어납니다.
+        // CustomUserDetailsService가 호출되어 DB 검증
         Authentication authentication = authenticationManager.authenticate(authToken);
 
-        String username = authentication.getName();
+        // 인증 성공 후 CustomUserDetails에서 memberId(PK) 추출 <- JWT 생성 시 memberEmail이 아니라 memberId를 사용하기 위해서
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long memberId = userDetails.getMemberId();
+
         String role = getRole(authentication);
 
         // 토큰 발급 및 Redis 저장
-        return generateTokens(username, role);
+        return generateTokens(memberId, role);
     }
 
-    // 2. 재발급 로직
+    // 재발급 로직
     @Transactional
     public TokenResponse reissue(String refreshToken) {
         if (refreshToken == null) {
@@ -115,17 +111,17 @@ public class MemberService {
         RefreshToken storedToken = refreshTokenRepository.findById(refreshToken)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
 
-        String username = storedToken.getUsername();
-        String role = storedToken.getRole(); // 🚀 Redis에 저장된 Role 사용
+        Long memberId = storedToken.getMemberId();
+        String role = storedToken.getRole(); // Redis에 저장된 Role 사용
 
         // 기존 토큰 삭제 (Refresh Token Rotation)
         refreshTokenRepository.deleteById(refreshToken);
 
         // 새 토큰 발급 및 Redis 저장
-        return generateTokens(username, role);
+        return generateTokens(memberId, role);
     }
 
-    // 3. 로그아웃 로직
+    // 로그아웃
     @Transactional
     public void logout(String refreshToken) {
         if (refreshToken != null && refreshTokenRepository.existsById(refreshToken)) {
@@ -133,16 +129,16 @@ public class MemberService {
         }
     }
 
-    // 내부 메서드: 토큰 생성 및 Redis 저장 공통화
-    private TokenResponse generateTokens(String username, String role) {
-        long accessExpire = 5000L;      // 5초
+    // 토큰 생성 및 Redis 저장 공통화
+    private TokenResponse generateTokens(Long memberId, String role) {
+        long accessExpire = 1800000L;      // 30분
         long refreshExpire = 86400000L;   // 24시간
 
-        String accessToken = jwtUtil.createJwt("access", username, role, accessExpire);
-        String refreshToken = jwtUtil.createJwt("refresh", username, role, refreshExpire);
+        String accessToken = jwtUtil.createJwt(memberId, "access", role, accessExpire);
+        String refreshToken = jwtUtil.createJwt(memberId, "refresh", role, refreshExpire);
 
-        // 🚀 Redis에 저장 (username, role 포함)
-        refreshTokenRepository.save(new RefreshToken(refreshToken, username, role));
+        // Redis에 저장 (memberId, role 포함)
+        refreshTokenRepository.save(new RefreshToken(refreshToken, memberId, role));
 
         return new TokenResponse(accessToken, refreshToken);
     }

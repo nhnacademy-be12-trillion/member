@@ -32,8 +32,8 @@ public class JWTUtil {
                 .getPayload();
     }
 
-    public String getUsername(String token) {
-        return getClaims(token).get("username", String.class);
+    public Long getMemberId(String token) {
+        return Long.valueOf(getClaims(token).getSubject());
     }
 
     public String getRole(String token) {
@@ -49,11 +49,11 @@ public class JWTUtil {
         }
     }
 
-    public String createJwt(String category, String username, String role, Long expiredMs) {
+    public String createJwt(Long memberId, String category, String role, Long expiredMs) {
         Date now = new Date();
         return Jwts.builder()
+                .subject(memberId.toString())
                 .claim("category",category)
-                .claim("username", username)
                 .claim("role", role)
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + expiredMs))

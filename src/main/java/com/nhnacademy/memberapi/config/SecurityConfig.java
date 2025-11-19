@@ -11,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -29,7 +30,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // AuthenticationManager Bean 등록 (Controller에서 사용)
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
@@ -42,14 +42,13 @@ public class SecurityConfig {
         http.formLogin((auth)-> auth.disable());
         http.httpBasic((auth) -> auth.disable());
 
-        // /login 경로는 permitAll로 열려 있어야 Controller에 도달 가능
         http.authorizeHttpRequests((auth)->auth
-                .requestMatchers("/login", "/", "/signup", "/error","/reissue","/logout").permitAll()
+                .requestMatchers("/login", "/login/**", "/", "/signup", "/error","/reissue","/logout").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated());
 
-        // JWTFilter는 계속 필요 (다른 API 접근 시 토큰 검증용)
-        http.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+        // JWTFilter (다른 API 접근 시 토큰 검증용)
+        http.addFilterBefore(new JWTFilter(jwtUtil), AuthorizationFilter.class);
 
         http.sessionManagement((session) -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
