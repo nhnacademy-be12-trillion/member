@@ -3,9 +3,9 @@ POST localhost:8080/signup
 Content-Type: application/json
 
 {
-  "memberEmail": "test7@nhn.com",
+  "memberEmail": "test@nhn.com",
   "memberPassword": "password1234",
-  "memberName": "테스트7",
+  "memberName": "테스트",
   "memberContact": "010-1234-5678",
   "memberBirth": "2000-01-01"
 }
@@ -16,9 +16,41 @@ POST http://localhost:8080/login
 Content-Type: application/json
 
 {
-  "memberEmail": "test7@nhn.com",
+  "memberEmail": "test@nhn.com",
   "memberPassword": "password1234"
 }
 
 ### 재발급 요청
 POST http://localhost:8080/reissue
+#Refresh-Token: {refreshToken입력}
+Refresh-Token: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiY2F0ZWdvcnkiOiJyZWZyZXNoIiwicm9sZSI6Ik1FTUJFUiIsImlhdCI6MTc2MzU5Nzg0MywiZXhwIjoxNzYzNjg0MjQzfQ.iDozm9IbX-mufClUHtsu90RytgbvG3sl_h2-3rnqL2O5bfJHK_H98jKhZdwOphAl-emss_BQ3sy38OIKYQWLYA
+
+
+
+### 주소 등록 (POST /members/addresses)
+# 권한: MEMBER (Access Token 필요)
+POST http://localhost:8080/members/addresses
+#Authorization: Bearer {accessToken 입력}
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzYzNjE3NzcwLCJleHAiOjE3NjM2MTk1NzB9.nsrWIfU5888SYALZb2mC5R3QudlYDIOqALdorNXl3fjVSf2HwEDjcdwSas8yZJI5hTb27Y4ztqspkZ5PzP7cuQ
+Content-Type: application/json
+
+{
+  "addressPostCode": "61945",
+  "addressBase": "광주광역시청",
+  "addressDetail": "1층",
+  "addressAlias": "주소 등록"
+}
+
+### 주소 수정 (PUT /members/addresses)
+PUT http://localhost:8080/members/addresses
+#Authorization: Bearer {accessToken 입력}
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzYzNjE3NzcwLCJleHAiOjE3NjM2MTk1NzB9.nsrWIfU5888SYALZb2mC5R3QudlYDIOqALdorNXl3fjVSf2HwEDjcdwSas8yZJI5hTb27Y4ztqspkZ5PzP7cuQ
+Content-Type: application/json
+
+{
+  "addressId": 1,
+  "addressPostCode": "61466",
+  "addressBase": "광주광역시동구청",
+  "addressDetail": "5층",
+  "addressAlias": "새로운 주소"
+}

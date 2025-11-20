@@ -1,13 +1,13 @@
 package com.nhnacademy.memberapi.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "Address")
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Address {
 
@@ -31,4 +31,11 @@ public class Address {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false) // FK 컬럼명
     private Member member;
+
+    public void update(String postCode, String base, String detail, String alias) {
+        this.addressPostCode = postCode;
+        this.addressBase = base;
+        this.addressDetail = detail;
+        this.addressAlias = alias;
+    }
 }

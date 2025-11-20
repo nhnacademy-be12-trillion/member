@@ -35,7 +35,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // 토큰 검증이 불필요한 경로는 토큰 검증을 건너뛰고 즉시 filterChain.doFilter()를 호출하여 다음 필터로 요청을 넘긴다.
         // signup, login, reissue, logout은 Access Token 검증이 필요 없으므로 패스
-        if (requestURI.endsWith("/signup") || requestURI.endsWith("/login") || requestURI.equals("/reissue") || requestURI.equals("/logout") || requestURI.equals("/")) {
+        if (requestURI.endsWith("/signup") || requestURI.endsWith("/login") || requestURI.equals("/reissue") || requestURI.equals("/logout") || requestURI.equals("/") || requestURI.equals("/h2-console/**")) {
             filterChain.doFilter(request, response);
             return;
         }

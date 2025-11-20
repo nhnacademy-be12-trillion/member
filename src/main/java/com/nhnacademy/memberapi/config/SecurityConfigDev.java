@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,13 +18,13 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
 @Configuration
 @EnableWebSecurity
-@Profile("op")
-public class SecurityConfig {
+@Profile("dev")
+public class SecurityConfigDev {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil) {
+    public SecurityConfigDev(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
     }
@@ -45,8 +46,13 @@ public class SecurityConfig {
         http.formLogin((auth)-> auth.disable());
         http.httpBasic((auth) -> auth.disable());
 
+        // 프레임 옵션 설정: 모든 URL의 프레임 보호 해제(X-Frame-Options를 비활성화)
+        // h2 DB를 위해 dev 환경에서만 X-Frame-Options 임시 비활성화
+        http.headers((headers) -> headers
+                .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
+
         http.authorizeHttpRequests((auth)->auth
-                .requestMatchers("/login", "/login/**", "/", "/signup", "/error","/reissue","/logout").permitAll()
+                .requestMatchers("/login", "/login/**", "/", "/signup", "/error","/reissue","/logout","/h2-console/**","/members/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated());
 
