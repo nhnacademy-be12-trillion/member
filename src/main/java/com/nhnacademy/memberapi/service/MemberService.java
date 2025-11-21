@@ -1,11 +1,14 @@
 package com.nhnacademy.memberapi.service;
 
 import com.nhnacademy.memberapi.dto.request.MemberSignupRequest;
+import com.nhnacademy.memberapi.dto.request.MemberUpdateRequest;
+import com.nhnacademy.memberapi.dto.response.MemberResponse;
 import com.nhnacademy.memberapi.entity.*;
 import com.nhnacademy.memberapi.exception.UserAlreadyExistsException;
 import com.nhnacademy.memberapi.repository.GradeRepository;
 import com.nhnacademy.memberapi.repository.MemberRepository;
 import com.nhnacademy.memberapi.repository.RefreshTokenRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -69,5 +73,22 @@ public class MemberService {
         if (refreshToken != null && refreshTokenRepository.existsById(refreshToken)) {
             refreshTokenRepository.deleteById(refreshToken);
         }
+    }
+
+    public void updateMember(Long memberId, @Valid MemberUpdateRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+        member.setMemberPassword(request.memberPassword());
+        member.setMemberContact(request.memberContact());
+        member.setMemberName(request.memberName());
+        member.setMemberBirth(request.memberBirth());
+        memberRepository.save(member);
+    }
+
+    public MemberResponse getMember(@Valid Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(()-> new UsernameNotFoundException("Member not found"));
+        return MemberResponse.fromEntity(member);
+
     }
 }

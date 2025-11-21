@@ -14,7 +14,7 @@ public record MemberResponse(
         LocalDate memberBirth,
         MemberState memberState,
         Integer memberPoint,
-        Grade memberGrade
+        String gradeName
 ) {
     public static MemberResponse fromEntity(Member member) {
         return new MemberResponse(
@@ -25,7 +25,7 @@ public record MemberResponse(
                 member.getMemberBirth(),
                 member.getMemberState(),
                 member.getMemberPoint(),
-                member.getGrade()
+                member.getGrade().getGradeName().name()
         );
     }
 }

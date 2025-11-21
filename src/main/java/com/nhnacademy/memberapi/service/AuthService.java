@@ -97,6 +97,7 @@ public class AuthService {
 
     // 토큰 생성 및 Redis 저장 공통화
     private TokenResponse generateTokens(Long memberId, String role) {
+        // ms
         long accessExpire = 1800000L;      // 30분
         long refreshExpire = 86400000L;   // 24시간
 

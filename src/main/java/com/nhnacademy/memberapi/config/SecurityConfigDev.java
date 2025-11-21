@@ -52,7 +52,7 @@ public class SecurityConfigDev {
                 .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
 
         http.authorizeHttpRequests((auth)->auth
-                .requestMatchers("/login", "/login/**", "/", "/signup", "/error","/reissue","/logout","/h2-console/**","/members/**").permitAll()
+                .requestMatchers("/member/**", "/auth/**", "/error", "/h2-console/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated());
 

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 // todo 예외 처리
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("auth")
 public class AuthController {
 
     private final AuthService authService;

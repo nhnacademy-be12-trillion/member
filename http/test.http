@@ -1,5 +1,5 @@
 ### 회원가입
-POST localhost:8080/signup
+POST localhost:8080/member/signup
 Content-Type: application/json
 
 {
@@ -12,7 +12,7 @@ Content-Type: application/json
 
 
 ### 로그인
-POST http://localhost:8080/login
+POST http://localhost:8080/auth/login
 Content-Type: application/json
 
 {
@@ -20,18 +20,43 @@ Content-Type: application/json
   "memberPassword": "password1234"
 }
 
+
 ### 재발급 요청
-POST http://localhost:8080/reissue
+POST http://localhost:8080/auth/reissue
 #Refresh-Token: {refreshToken입력}
 Refresh-Token: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiY2F0ZWdvcnkiOiJyZWZyZXNoIiwicm9sZSI6Ik1FTUJFUiIsImlhdCI6MTc2MzU5Nzg0MywiZXhwIjoxNzYzNjg0MjQzfQ.iDozm9IbX-mufClUHtsu90RytgbvG3sl_h2-3rnqL2O5bfJHK_H98jKhZdwOphAl-emss_BQ3sy38OIKYQWLYA
 
 
-
-### 주소 등록 (POST /members/addresses)
-# 권한: MEMBER (Access Token 필요)
-POST http://localhost:8080/members/addresses
+### 회원조회
+GET http://localhost:8080/member/1
 #Authorization: Bearer {accessToken 입력}
-Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzYzNjE3NzcwLCJleHAiOjE3NjM2MTk1NzB9.nsrWIfU5888SYALZb2mC5R3QudlYDIOqALdorNXl3fjVSf2HwEDjcdwSas8yZJI5hTb27Y4ztqspkZ5PzP7cuQ
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzYzNjg5NzU5LCJleHAiOjE3NjM2OTE1NTl9.LLWB1sHTi_U4EW_lIaJCrfhxsbAg5lykxylNq_3b37ANq4scfUvhvpugy3RWPR5nlTD_OaNIBB_v26XSyUZwbw
+Content-Type: application/json
+
+### 회원수정
+PUT http://localhost:8080/member/update/1
+#Authorization: Bearer {accessToken 입력}
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzYzNjg5NzU5LCJleHAiOjE3NjM2OTE1NTl9.LLWB1sHTi_U4EW_lIaJCrfhxsbAg5lykxylNq_3b37ANq4scfUvhvpugy3RWPR5nlTD_OaNIBB_v26XSyUZwbw
+Content-Type: application/json
+
+{
+  "memberEmail": "test@nhn.com",
+  "memberPassword": "passwordUpdated",
+  "memberName": "업데이트",
+  "memberContact": "010-0000-0000",
+  "memberBirth": "2000-11-11"
+}
+
+### 회원삭제
+DELETE http://localhost:8080/member/delete/1
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzYzNjg5NzU5LCJleHAiOjE3NjM2OTE1NTl9.LLWB1sHTi_U4EW_lIaJCrfhxsbAg5lykxylNq_3b37ANq4scfUvhvpugy3RWPR5nlTD_OaNIBB_v26XSyUZwbw
+
+
+### 주소 등록
+# 권한: MEMBER (Access Token 필요)
+POST http://localhost:8080/member/{memberId}/addresses
+#Authorization: Bearer {accessToken 입력}
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzYzNjg5NzU5LCJleHAiOjE3NjM2OTE1NTl9.LLWB1sHTi_U4EW_lIaJCrfhxsbAg5lykxylNq_3b37ANq4scfUvhvpugy3RWPR5nlTD_OaNIBB_v26XSyUZwbw
 Content-Type: application/json
 
 {
@@ -41,10 +66,16 @@ Content-Type: application/json
   "addressAlias": "주소 등록"
 }
 
+
+### 주소 조회
+GET http://localhost:8080/member/{memberId}/addresses/{address}
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzYzNjg5NzU5LCJleHAiOjE3NjM2OTE1NTl9.LLWB1sHTi_U4EW_lIaJCrfhxsbAg5lykxylNq_3b37ANq4scfUvhvpugy3RWPR5nlTD_OaNIBB_v26XSyUZwbw
+Content-Type: application/json
+
 ### 주소 수정 (PUT /members/addresses)
-PUT http://localhost:8080/members/addresses
+PUT http://localhost:8080/members/{memberId}/addresses/{address}
 #Authorization: Bearer {accessToken 입력}
-Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzYzNjE3NzcwLCJleHAiOjE3NjM2MTk1NzB9.nsrWIfU5888SYALZb2mC5R3QudlYDIOqALdorNXl3fjVSf2HwEDjcdwSas8yZJI5hTb27Y4ztqspkZ5PzP7cuQ
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzYzNjg5NzU5LCJleHAiOjE3NjM2OTE1NTl9.LLWB1sHTi_U4EW_lIaJCrfhxsbAg5lykxylNq_3b37ANq4scfUvhvpugy3RWPR5nlTD_OaNIBB_v26XSyUZwbw
 Content-Type: application/json
 
 {

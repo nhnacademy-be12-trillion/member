@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 // todo 예외 처리
 @RestController
-@RequestMapping("/members/addresses")
+@RequestMapping("/member/addresses")
 @RequiredArgsConstructor
 public class AddressController {
 
