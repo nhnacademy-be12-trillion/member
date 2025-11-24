@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record AddressUpdateRequest(
-        // 수정할 주소를 식별하기 위해서...
+        // 수정할 주소를 식별하기 위해서
         @NotNull
         Long addressId,
         // 우편 번호

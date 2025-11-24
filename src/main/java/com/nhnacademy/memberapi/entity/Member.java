@@ -31,7 +31,7 @@ public class Member {
     @Column(name = "member_name", nullable = false, length = 255)
     private String memberName;
 
-    @Column(name = "member_contact", nullable = false, length = 255)
+    @Column(name = "member_contact", length = 255)
     private String memberContact;
 
     @Column(name = "member_birth", nullable = false)

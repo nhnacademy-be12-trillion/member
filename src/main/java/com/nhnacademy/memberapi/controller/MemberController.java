@@ -3,8 +3,8 @@ package com.nhnacademy.memberapi.controller;
 import com.nhnacademy.memberapi.dto.CustomUserDetails;
 import com.nhnacademy.memberapi.dto.request.MemberSignupRequest;
 import com.nhnacademy.memberapi.dto.request.MemberUpdateRequest;
+import com.nhnacademy.memberapi.dto.request.SocialSignupRequest;
 import com.nhnacademy.memberapi.dto.response.MemberResponse;
-import com.nhnacademy.memberapi.entity.Member;
 import com.nhnacademy.memberapi.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-// todo 예외 처리
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/member")
+@RequestMapping("/members")
 public class MemberController {
 
     private final MemberService memberService;
@@ -26,6 +25,22 @@ public class MemberController {
     public ResponseEntity<Void> signup(@Valid @RequestBody MemberSignupRequest request) {
         memberService.signupMember(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    //소셜 회원 가입
+    @PostMapping("/signup/social")
+    public ResponseEntity<Void> socialSignup(@Valid @RequestBody SocialSignupRequest request) {
+        memberService.socialSignupMember(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    //회원 조회
+    @GetMapping
+    public ResponseEntity<MemberResponse> getMember(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+        MemberResponse response = memberService.getMember(userDetails.getMemberId());
+        return ResponseEntity.ok(response);
     }
 
     // 회원 탈퇴
@@ -39,19 +54,12 @@ public class MemberController {
     }
 
     // 회원 수정
-    @PutMapping("/update/{memberId}")
+    @PutMapping
     public ResponseEntity<Void> updateMember(
-            @PathVariable("memberId") Long memberId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody MemberUpdateRequest request
     ){
-        memberService.updateMember(memberId, request);
+        memberService.updateMember(userDetails.getMemberId(), request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    //회원 조회
-    @GetMapping("/{memberId}")
-    public MemberResponse getMember(@PathVariable("memberId") Long memberId
-    ){
-        return memberService.getMember(memberId);
     }
 }

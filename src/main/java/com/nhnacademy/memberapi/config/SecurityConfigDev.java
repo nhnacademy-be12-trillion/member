@@ -2,6 +2,9 @@ package com.nhnacademy.memberapi.config;
 
 import com.nhnacademy.memberapi.jwt.JWTFilter;
 import com.nhnacademy.memberapi.jwt.JWTUtil;
+import com.nhnacademy.memberapi.jwt.SocialLoginHandler;
+import com.nhnacademy.memberapi.service.CustomOAuth2UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -19,15 +22,12 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 @Configuration
 @EnableWebSecurity
 @Profile("dev")
+@RequiredArgsConstructor
 public class SecurityConfigDev {
 
-    private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
-
-    public SecurityConfigDev(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil) {
-        this.authenticationConfiguration = authenticationConfiguration;
-        this.jwtUtil = jwtUtil;
-    }
+    private final SocialLoginHandler socialLoginHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -50,6 +50,13 @@ public class SecurityConfigDev {
         // h2 DB를 위해 dev 환경에서만 X-Frame-Options 임시 비활성화
         http.headers((headers) -> headers
                 .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
+
+        // OAuth2 설정
+        http.oauth2Login((oauth2) -> oauth2
+                .userInfoEndpoint((userInfo) -> userInfo
+                        .userService(customOAuth2UserService))
+                .successHandler(socialLoginHandler)
+        );
 
         http.authorizeHttpRequests((auth)->auth
                 .requestMatchers("/member/**", "/auth/**", "/error", "/h2-console/**").permitAll()

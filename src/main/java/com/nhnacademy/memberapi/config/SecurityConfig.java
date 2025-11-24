@@ -2,6 +2,9 @@ package com.nhnacademy.memberapi.config;
 
 import com.nhnacademy.memberapi.jwt.JWTFilter;
 import com.nhnacademy.memberapi.jwt.JWTUtil;
+import com.nhnacademy.memberapi.jwt.SocialLoginHandler;
+import com.nhnacademy.memberapi.service.CustomOAuth2UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -18,15 +21,12 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 @Configuration
 @EnableWebSecurity
 @Profile("op")
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
-
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil) {
-        this.authenticationConfiguration = authenticationConfiguration;
-        this.jwtUtil = jwtUtil;
-    }
+    private final SocialLoginHandler socialLoginHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -44,6 +44,13 @@ public class SecurityConfig {
         http.csrf((auth)-> auth.disable());
         http.formLogin((auth)-> auth.disable());
         http.httpBasic((auth) -> auth.disable());
+
+        // OAuth2 설정
+        http.oauth2Login((oauth2) -> oauth2
+                .userInfoEndpoint((userInfo) -> userInfo
+                        .userService(customOAuth2UserService))
+                .successHandler(socialLoginHandler)
+        );
 
         http.authorizeHttpRequests((auth)->auth
                 .requestMatchers("/login", "/login/**", "/", "/signup", "/error","/reissue","/logout").permitAll()

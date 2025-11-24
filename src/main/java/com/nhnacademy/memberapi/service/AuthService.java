@@ -6,6 +6,8 @@ import com.nhnacademy.memberapi.dto.response.TokenResponse;
 import com.nhnacademy.memberapi.entity.Member;
 import com.nhnacademy.memberapi.entity.MemberState;
 import com.nhnacademy.memberapi.entity.RefreshToken;
+import com.nhnacademy.memberapi.exception.InvalidRefreshTokenException;
+import com.nhnacademy.memberapi.exception.MemberStateConflictException;
 import com.nhnacademy.memberapi.jwt.JWTUtil;
 import com.nhnacademy.memberapi.repository.MemberRepository;
 import com.nhnacademy.memberapi.repository.RefreshTokenRepository;
@@ -42,10 +44,10 @@ public class AuthService {
 
         // 탈퇴/휴면 계정 로그인 방지 로직
         if (member.getMemberState() == MemberState.WITHDRAWAL) {
-            throw new IllegalStateException("탈퇴한 회원입니다.");
+            throw new MemberStateConflictException("탈퇴한 회원입니다.");
         }
         if (member.getMemberState() == MemberState.DORMANT) {
-            throw new IllegalStateException("휴면 계정입니다.");
+            throw new MemberStateConflictException("휴면 계정입니다.");
         }
 
         // 로그인 시간 갱신
@@ -60,23 +62,23 @@ public class AuthService {
     // 재발급 로직
     public TokenResponse reissue(String refreshToken) {
         if (refreshToken == null) {
-            throw new IllegalArgumentException("Refresh token is null");
+            throw new InvalidRefreshTokenException("Refresh token is null");
         }
 
         try {
             jwtUtil.isExpired(refreshToken);
         } catch (ExpiredJwtException e) {
-            throw new IllegalArgumentException("Refresh token expired");
+            throw new InvalidRefreshTokenException("Refresh token expired");
         }
 
         String category = jwtUtil.getCategory(refreshToken);
         if (!category.equals("refresh")) {
-            throw new IllegalArgumentException("Invalid token category");
+            throw new InvalidRefreshTokenException("Invalid token category");
         }
 
         // Redis에서 토큰 조회 (없으면 예외 발생)
         RefreshToken storedToken = refreshTokenRepository.findById(refreshToken)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid refresh token"));
+                .orElseThrow(() -> new InvalidRefreshTokenException("Invalid refresh token"));
 
         Long memberId = storedToken.getMemberId();
         String role = storedToken.getRole(); // Redis에 저장된 Role 사용

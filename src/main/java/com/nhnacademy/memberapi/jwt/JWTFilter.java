@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.io.IOException;
 // 인증이 필요한 모든 요청에 대해 Access Token의 유효성을 검사하고 인증 정보를 SecurityContext에 설정하는 역할
 // 요청이 이 필터를 통과한 시점부터 Spring Security는 이 요청을 인증된 사용자의 요청으로 인식하며, 이후 인가(Authorization) 단계에서 설정된 권한(role)을 기반으로 리소스 접근 여부를 판단
 @Slf4j
+@Component
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
