@@ -6,7 +6,7 @@ import com.nhnacademy.memberapi.entity.RefreshToken;
 import com.nhnacademy.memberapi.repository.MemberRepository;
 import com.nhnacademy.memberapi.repository.RefreshTokenRepository;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie; // 쿠키 임포트
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
