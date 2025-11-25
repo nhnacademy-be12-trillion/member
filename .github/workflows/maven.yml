@@ -27,13 +27,15 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
-      - name: Build with Mave
+      - name: Build with Maven
         run: mvn -B package --file pom.xml
 
-      - name: Run SonarQube
-        if: github.event_name == 'push'
-        run: mvn sonar:sonar -Dsonar.projectKey=trillion-member -Dsonar.host.url=${{secrets.SONAR_HOST}} -Dsonar.login=${{secrets.SONAR_TOKEN}}
-
+      #    - name: Run SonarQube
+      #      run: |
+      #        mvn sonar:sonar \
+      #        -Dsonar.projectKey=trillion-gateway \
+      #        -Dsonar.host.url=${{secrets.SONAR_HOST}} \
+      #        -Dsonar.token=${{secrets.SONAR_TOKEN}}
 
       - name: upload file
         uses: appleboy/scp-action@master
@@ -43,7 +45,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           source: "target/*.jar"
-          target: "~/target"
+          target: "/home/backend/be12-team1/msa/"
           rm: false
 
       - name: execute shell script
@@ -53,6 +55,4 @@ jobs:
           username: ${{ secrets.SSH_ID }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
-          script_stop: true
-          script: "./startup.sh"
-
+          script: "cd ~/msa&&pwd&&ls&&sh member.sh"
