@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 성공</title>
+    <style>
+        body { font-family: sans-serif; padding: 2rem; }
+        .token-box { background: #f8f9fa; padding: 1rem; border: 1px solid #dee2e6; margin-bottom: 1rem; word-break: break-all; }
+    </style>
+</head>
+<body>
+<h1>🎉 로그인 성공! (Header/Cookie 방식)</h1>
+<p>쿠키를 통해 토큰이 전달되었습니다.</p>
+
+<h3>Access Token</h3>
+<div class="token-box" id="accessToken"></div>
+
+<h3>Refresh Token</h3>
+<div class="token-box" id="refreshToken"></div>
+
+<script>
+    // 쿠키 값을 가져오는 헬퍼 함수
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    // 쿠키에서 토큰 읽기
+    const accessToken = getCookie('access_token');
+    const refreshToken = getCookie('refresh_token');
+
+    document.getElementById('accessToken').innerText = accessToken ? accessToken : "토큰 없음";
+    document.getElementById('refreshToken').innerText = refreshToken ? refreshToken : "토큰 없음";
+
+    //  로컬 스토리지로 옮기고 쿠키 삭제 (보안 전략에 따라 다름)
+    // if (accessToken) {
+    //     localStorage.setItem('access', accessToken);
+    //     document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    // }
+</script>
+</body>
+</html>

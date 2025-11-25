@@ -5,10 +5,10 @@ import com.nhnacademy.memberapi.dto.response.TokenResponse;
 import com.nhnacademy.memberapi.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-// todo 예외 처리
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("auth")
@@ -16,9 +16,13 @@ public class AuthController {
 
     private final AuthService authService;
 
+    // 토큰을 body가 아닌 header에 설정
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest request) {
+        TokenResponse tokenResponse = authService.login(request);
+        return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION,"Bearer " + tokenResponse.accessToken())
+                .header("Refresh-Token", tokenResponse.refreshToken())
+                .build();
     }
 
     @PostMapping("/logout")

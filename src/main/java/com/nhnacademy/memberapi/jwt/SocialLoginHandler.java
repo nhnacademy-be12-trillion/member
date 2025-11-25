@@ -6,6 +6,7 @@ import com.nhnacademy.memberapi.entity.RefreshToken;
 import com.nhnacademy.memberapi.repository.MemberRepository;
 import com.nhnacademy.memberapi.repository.RefreshTokenRepository;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie; // 쿠키 임포트
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -31,37 +34,50 @@ public class SocialLoginHandler extends SimpleUrlAuthenticationSuccessHandler {
 
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
         String email = customUserDetails.getEmail();
-
-        // 권한 확인 (ROLE_MEMBER vs ROLE_GUEST)
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         String role = authorities.iterator().next().getAuthority();
 
         if ("ROLE_GUEST".equals(role)) {
-            // 신규 회원 -> 생년월일 입력 페이지로 리다이렉트
-            // 임시 토큰 생성 (유효기간 10분, category="register")
-            // DB 저장이 안 된 상태이므로 memberId 대신 0L 혹은 임시값 사용, 중요한 건 email claim
-            String registerToken = jwtUtil.createJwt(0L, "register", "ROLE_GUEST", 600000L); // createJwt 메서드 수정 필요 혹은 email 전용 메서드 추가
+            // [신규 회원] -> 쿠키에 Register Token 담기
+            String registerToken = jwtUtil.createJwt(0L, "register", "ROLE_GUEST", 600000L);
 
-            // 프론트엔드의 추가 정보 입력 페이지 URL (쿼리 파라미터로 토큰 전달)
-            // 실제로는 email 정보도 토큰 안에 claims로 넣는 게 안전함. 여기서는 기존 createJwt가 memberId 기반이라 가정하고 아래에서 보완 설명.
-            response.sendRedirect("http://localhost:3000/signup/social?token=" + registerToken + "&email=" + email + "&name=" + customUserDetails.getName());
+            // 쿠키 생성
+            response.addCookie(createCookie("register_token", registerToken, 600)); // 10분
+            // 정보 전달용 (화면 표시용) - 이메일/이름은 보안 민감도가 낮으므로 파라미터로 넘겨도 됨
+            String encodedName = URLEncoder.encode(customUserDetails.getName(), StandardCharsets.UTF_8);
+
+            response.sendRedirect("/signup.html?email=" + email + "&name=" + encodedName);
 
         } else {
-            // 기존 회원 -> 로그인 처리
+            // [기존 회원] -> 쿠키에 Access/Refresh Token 담기
             Optional<Member> memberOp = memberRepository.findByMemberEmail(email);
             if(memberOp.isEmpty()) {
-                response.sendRedirect("http://localhost:3000/login?error=not_found");
+                response.sendRedirect("/login?error=not_found");
                 return;
             }
             Member member = memberOp.get();
 
-            // 토큰 발급
             String accessToken = jwtUtil.createJwt(member.getMemberId(), "access", "ROLE_MEMBER", 1800000L);
             String refreshToken = jwtUtil.createJwt(member.getMemberId(), "refresh", "ROLE_MEMBER", 86400000L);
 
             refreshTokenRepository.save(new RefreshToken(refreshToken, member.getMemberId(), "ROLE_MEMBER"));
 
-            response.sendRedirect("http://localhost:3000/login-success?access=" + accessToken + "&refresh=" + refreshToken);
+            // 헤더(Set-Cookie) 설정
+            response.addCookie(createCookie("access_token", accessToken, 1800)); // 30분
+            response.addCookie(createCookie("refresh_token", refreshToken, 86400)); // 24시간
+
+            // URL 파라미터 없이 깔끔하게 리다이렉트
+            response.sendRedirect("/login-success.html");
         }
+    }
+
+    // 쿠키 생성 유틸 메서드
+    private Cookie createCookie(String key, String value, int maxAge) {
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(maxAge);
+        cookie.setPath("/");
+        cookie.setHttpOnly(false); // JS에서 읽을 수 있게 false (보안 강화하려면 true로 하고 API 통신만 해야 함)
+        // cookie.setSecure(true); // HTTPS 적용 시 주석 해제
+        return cookie;
     }
 }

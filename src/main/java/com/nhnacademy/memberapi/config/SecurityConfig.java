@@ -7,11 +7,11 @@ import com.nhnacademy.memberapi.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +20,6 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
 @Configuration
 @EnableWebSecurity
-@Profile("op")
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -45,6 +44,11 @@ public class SecurityConfig {
         http.formLogin((auth)-> auth.disable());
         http.httpBasic((auth) -> auth.disable());
 
+        // 프레임 옵션 설정: 모든 URL의 프레임 보호 해제(X-Frame-Options를 비활성화)
+        // h2 DB를 위해 dev 환경에서만 X-Frame-Options 임시 비활성화
+        http.headers((headers) -> headers
+                .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
+
         // OAuth2 설정
         http.oauth2Login((oauth2) -> oauth2
                 .userInfoEndpoint((userInfo) -> userInfo
@@ -53,7 +57,8 @@ public class SecurityConfig {
         );
 
         http.authorizeHttpRequests((auth)->auth
-                .requestMatchers("/login", "/login/**", "/", "/signup", "/error","/reissue","/logout").permitAll()
+                .requestMatchers("/signup.html","login-success.html").permitAll()
+                .requestMatchers("/members/**", "/auth/**", "/error", "/h2-console/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated());
 

@@ -1,6 +1,5 @@
 package com.nhnacademy.memberapi.dto.response;
 
-import com.nhnacademy.memberapi.entity.Grade;
 import com.nhnacademy.memberapi.entity.Member;
 import com.nhnacademy.memberapi.entity.MemberState;
 
