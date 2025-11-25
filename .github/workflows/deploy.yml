@@ -51,7 +51,7 @@ jobs:
       - name: 도커 이미지 빌드 & 푸시
         uses: docker/build-push-action@v6
         with:
-          context: ./Dockerfile
+          context: .
           file: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
