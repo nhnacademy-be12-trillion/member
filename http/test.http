@@ -1,5 +1,5 @@
 ### 회원가입
-POST localhost:8080/member/signup
+POST localhost:8080/api/members/signup
 Content-Type: application/json
 
 {
@@ -12,7 +12,7 @@ Content-Type: application/json
 
 
 ### 로그인
-POST http://localhost:8080/auth/login
+POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
@@ -22,19 +22,19 @@ Content-Type: application/json
 
 
 ### 재발급 요청
-POST http://localhost:8080/auth/reissue
+POST http://localhost:8080/api/auth/reissue
 #Refresh-Token: {refreshToken입력}
 Refresh-Token: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiY2F0ZWdvcnkiOiJyZWZyZXNoIiwicm9sZSI6Ik1FTUJFUiIsImlhdCI6MTc2MzU5Nzg0MywiZXhwIjoxNzYzNjg0MjQzfQ.iDozm9IbX-mufClUHtsu90RytgbvG3sl_h2-3rnqL2O5bfJHK_H98jKhZdwOphAl-emss_BQ3sy38OIKYQWLYA
 
 
 ### 회원조회
-GET http://localhost:8080/member/1
+GET http://localhost:8080/api/members/1
 #Authorization: Bearer {accessToken 입력}
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzYzNzE0NDg5LCJleHAiOjE3NjM3MTYyODl9.eA7cCYrjtIR3D9LajBgq7olag6kLVc6Y5LTcjhP1yWTX6rHlgn_UlmV7M_o3LexNfKPh4EjWwGqfcd8P7InMxw
 Content-Type: application/json
 
 ### 회원수정
-PUT http://localhost:8080/member/update/1
+PUT http://localhost:8080/api/members/update/1
 #Authorization: Bearer {accessToken 입력}
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzYzNzE0NDg5LCJleHAiOjE3NjM3MTYyODl9.eA7cCYrjtIR3D9LajBgq7olag6kLVc6Y5LTcjhP1yWTX6rHlgn_UlmV7M_o3LexNfKPh4EjWwGqfcd8P7InMxw
 Content-Type: application/json

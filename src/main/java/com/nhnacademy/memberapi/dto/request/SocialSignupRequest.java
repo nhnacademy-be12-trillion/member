@@ -13,5 +13,6 @@ public record SocialSignupRequest(
         String name,
         @NotNull
         LocalDate birthDate,
+        @NotNull
         String contact
 ) {}
