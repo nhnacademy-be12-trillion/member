@@ -82,6 +82,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
+    // 400 Bad Request Error (이메일 전송 오류)
+    @ExceptionHandler(EmailSendException.class)
+    public ResponseEntity<ErrorResponse> handleEmailSendException(EmailSendException e) {
+        ErrorResponse response = ErrorResponse.of(
+                "Email Send Failed",
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 
     // 500 Internal Server Error (그 외 모든 예외)
     @ExceptionHandler(Exception.class)

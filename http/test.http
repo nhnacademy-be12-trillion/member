@@ -85,3 +85,21 @@ Content-Type: application/json
   "addressDetail": "5층",
   "addressAlias": "새로운 주소"
 }
+
+
+### 이메일 전송
+POST http://localhost:8080/api/members/emails
+Content-Type: application/json
+
+{
+  "email": "shhk2100@gmail.com"
+}
+
+### 인증번호 확인
+POST http://localhost:8080/api/members/emails/verify
+Content-Type: application/json
+
+{
+    "email": "shhk2100@gmail.com",
+    "code": "150252"
+}

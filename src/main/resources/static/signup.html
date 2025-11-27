@@ -27,7 +27,7 @@
     <label>생년월일 (필수)</label>
     <input type="date" id="birthDate" required>
 
-    <label>연락처 (선택)</label>
+    <label>연락처 (필수)</label>
     <input type="text" id="contact" placeholder="010-0000-0000">
 
     <button onclick="submitSignup()">가입 완료</button>
@@ -53,10 +53,10 @@
             alert("생년월일은 필수입니다.");
             return;
         }
-        // if (!contact) {
-        //     alert("전화번호는 필수입니다.")
-        //     return;
-        // }
+        if (!contact) {
+            alert("전화번호는 필수입니다.")
+            return;
+        }
 
         const data = {
             email: email,

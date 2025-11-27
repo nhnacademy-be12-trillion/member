@@ -7,7 +7,7 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 
 @SpringBootApplication
 @EnableRedisRepositories
-@PropertySource("classpath:application-env.properties")
+@PropertySource("classpath:application-env.yml")
 public class MemberApiApplication {
 
     public static void main(String[] args) {

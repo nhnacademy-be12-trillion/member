@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.UUID;
 
+//todo 중복 회원가입 방지 -> 이메일 인증
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -67,7 +68,7 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
 
-        // 상태 변경 (탈퇴)
+        // 탈퇴 상태로 변경
         member.setMemberState(MemberState.WITHDRAWAL);
 
         // 로그아웃 처리 (Refresh Token 삭제)

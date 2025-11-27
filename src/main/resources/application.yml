@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: MemberApi
+  profiles:
+    active: dev, env
+
+  # Redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # JPA & HIBERNATE
+  jpa:
+    show-sql: true
+    # hibernate:
+    #   ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+
+  # JWT Secret
+  jwt:
+    secret: vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalajsfhalsjfhkqjknvazxv
+
+  # Google OAuth2
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-name: google
+            client-id: ${CLIENT-ID}
+            client-secret: ${CLIENT-SECRET}
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            scope: profile,email
+
+# Port
+server:
+  port: 8080
+
+### Eureka (Commented Out)
+# eureka:
+#   client:
+#     register-with-eureka: true
+#     fetch-registry: true
+#     service-url:
+#       defaultZone: http://be12-team1:nhnacademy123!@127.0.0.1:10419/eureka/,http://be12-team1:nhnacademy123!@127.0.0.1:10420/eureka/
+#   instance:
+#     prefer-ip-address: true
+#     instance-id: ${spring.application.name}:${server.port}
+
+### Actuator Logging (Commented Out)
+# management:
+#   endpoints:
+#     web:
+#       exposure:
+#         include: health, info
+
+# logging:
+#   level:
+#     org:
+#       hibernate:
+#         orm:
+#           jdbc:
+#             bind: trace
+#       springframework:
+#         transaction:
+#           interceptor: trace
+#     com:
+#       nhnacademy:
+#         OrderApplication: DEBUG

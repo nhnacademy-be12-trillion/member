@@ -38,7 +38,7 @@ public class SocialLoginHandler extends SimpleUrlAuthenticationSuccessHandler {
         String role = authorities.iterator().next().getAuthority();
 
         if ("ROLE_GUEST".equals(role)) {
-            // [신규 회원] -> 쿠키에 Register Token 담기
+            // 신규 회원은 쿠키에 Register Token
             String registerToken = jwtUtil.createJwt(0L, "register", "ROLE_GUEST", 600000L);
 
             // 쿠키 생성
@@ -49,7 +49,7 @@ public class SocialLoginHandler extends SimpleUrlAuthenticationSuccessHandler {
             response.sendRedirect("/signup.html?email=" + email + "&name=" + encodedName);
 
         } else {
-            // [기존 회원] -> 쿠키에 Access/Refresh Token 담기
+            // 기존 회원은 쿠키에 Access/Refresh Token
             Optional<Member> memberOp = memberRepository.findByMemberEmail(email);
             if(memberOp.isEmpty()) {
                 response.sendRedirect("/login?error=not_found");
@@ -62,7 +62,7 @@ public class SocialLoginHandler extends SimpleUrlAuthenticationSuccessHandler {
 
             refreshTokenRepository.save(new RefreshToken(refreshToken, member.getMemberId(), "ROLE_MEMBER"));
 
-            // 헤더(Set-Cookie) 설정
+            // 헤더 설정 (Set-Cookie)
             response.addCookie(createCookie("access_token", accessToken, 1800)); // 30분
             response.addCookie(createCookie("refresh_token", refreshToken, 86400)); // 24시간
 

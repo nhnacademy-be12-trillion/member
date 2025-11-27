@@ -1,0 +1,43 @@
+# server:
+#   port: 10407
+
+spring:
+  # H2 Database
+  datasource:
+    driver-class-name: org.h2.Driver
+    # url: jdbc:h2:mem:test;MODE=MySQL
+    url: jdbc:h2:mem:test
+    username: test
+    password: 1234
+
+  # H2 Console (http://localhost:8080/h2-console)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+
+  # JPA - H2 Dialect
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+
+  # -------------------------------------------------
+  # MySQL Database
+  # -------------------------------------------------
+  # datasource:
+  #   driver-class-name: com.mysql.cj.jdbc.Driver
+  #   ## internal IP
+  #   # url: jdbc:mysql://10.116.64.14:13306/nhn_academy_12?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+  #   ## external IP
+  #   url: jdbc:mysql://220.67.216.14:13306/nhn_academy_12?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+  #   username: nhn_academy_12
+  #   password: ${DB_PASSWORD}
+  #
+  # jpa:
+  #   database-platform: org.hibernate.dialect.MySQLDialect
+  #   hibernate:
+  #     ddl-auto: validated
