@@ -40,6 +40,7 @@ public class JWTUtil {
         return getClaims(token).get("role", String.class);
     }
 
+    // 토큰 만료 확인
     public Boolean isExpired(String token) {
         try {
             getClaims(token);
@@ -47,6 +48,11 @@ public class JWTUtil {
         } catch (ExpiredJwtException e) {
             return true;
         }
+    }
+
+    // 엑세스 토큰 만료 시간 계산. (Black List)
+    public Long getExpiration(String token) {
+        return getClaims(token).getExpiration().getTime();
     }
 
     public String createJwt(Long memberId, String category, String role, Long expiredMs) {

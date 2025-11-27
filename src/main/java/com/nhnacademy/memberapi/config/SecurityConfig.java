@@ -7,6 +7,7 @@ import com.nhnacademy.memberapi.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -26,6 +27,7 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final SocialLoginHandler socialLoginHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final StringRedisTemplate redisTemplate;
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -63,7 +65,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated());
 
         // JWTFilter (다른 API 접근 시 토큰 검증용)
-        http.addFilterBefore(new JWTFilter(jwtUtil), AuthorizationFilter.class);
+        http.addFilterBefore(new JWTFilter(jwtUtil, redisTemplate), AuthorizationFilter.class);
 
         http.sessionManagement((session) -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));

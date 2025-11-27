@@ -8,7 +8,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,13 +24,11 @@ import java.io.IOException;
 // 요청이 이 필터를 통과한 시점부터 Spring Security는 이 요청을 인증된 사용자의 요청으로 인식하며, 이후 인가(Authorization) 단계에서 설정된 권한(role)을 기반으로 리소스 접근 여부를 판단
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
-
-    public JWTFilter(JWTUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
-    }
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -54,11 +54,19 @@ public class JWTFilter extends OncePerRequestFilter {
         // Bearer 접두어를 제거하고 실제 JWT 값만 추출
         String token = authorization.split(" ")[1];
 
+        // 블랙리스트에 등록된 토큰인지 확인
+        // Redis에 "BL:" + token 키가 있으면 로그아웃된 토큰으로 간주
+        if (redisTemplate.hasKey("BL:" + token)) {
+            log.warn("로그아웃된 토큰(Blacklist)으로 접근 시도");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
         try {
             // 만료된 토큰인지 검사
             if (jwtUtil.isExpired(token)) {
                 log.info("token expired");
-                // 만료되었어도, "인증 안 된" 상태로 다음 필터로 보냄
+                // 만료되었어도, 인증 안 된 상태로 다음 필터로 보냄
                 filterChain.doFilter(request, response);
                 return;
             }

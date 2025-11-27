@@ -13,12 +13,16 @@ import com.nhnacademy.memberapi.repository.MemberRepository;
 import com.nhnacademy.memberapi.repository.RefreshTokenRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
@@ -29,6 +33,7 @@ public class AuthService {
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
     private final MemberRepository memberRepository;
+    private final StringRedisTemplate redisTemplate;
 
     // 로그인
     public TokenResponse login(LoginRequest request) {
@@ -91,9 +96,27 @@ public class AuthService {
     }
 
     // 로그아웃
-    public void logout(String refreshToken) {
+    public void logout(String refreshToken, String accessToken) {
+        // 로그아웃 시 Refresh Token 삭제
         if (refreshToken != null && refreshTokenRepository.existsById(refreshToken)) {
             refreshTokenRepository.deleteById(refreshToken);
+        }
+
+        String token = accessToken;
+
+        // Access Token 블랙 리스트 처리
+        if(accessToken != null && accessToken.startsWith("Bearer ")) {
+                token = accessToken.substring(7);
+            }
+        long expiration = jwtUtil.getExpiration(token);
+        long now = new Date().getTime();
+        long remainTime = expiration - now;
+
+        // Access Token의 시간이 남아있으면 존재한다는 의미이므로
+        if (remainTime > 0) {
+            // Key: BL:토큰값, Value: logout
+            redisTemplate.opsForValue()
+                    .set("BL:" + token, "logout", remainTime, TimeUnit.MILLISECONDS);
         }
     }
 
