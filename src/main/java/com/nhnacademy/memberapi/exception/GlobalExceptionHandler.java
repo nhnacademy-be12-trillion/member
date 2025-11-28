@@ -105,6 +105,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    // 401 Unauthorized Error (OAuth2 로그인 인증 필수 정보 누락)
+    @ExceptionHandler(OAuth2AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleOAuth2AuthenticationException(OAuth2AuthenticationException e) {
+        log.warn("OAuth2 인증 에러: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "인증이 필요합니다.",
+                HttpStatus.UNAUTHORIZED.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
     // 500 Internal Server Error (그 외 모든 예외)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception e) {

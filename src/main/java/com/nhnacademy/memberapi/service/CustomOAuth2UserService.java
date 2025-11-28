@@ -1,7 +1,11 @@
 package com.nhnacademy.memberapi.service;
 
-import com.nhnacademy.memberapi.dto.oauth2.*;
+import com.nhnacademy.memberapi.dto.oauth2.CustomOAuth2User;
+import com.nhnacademy.memberapi.dto.oauth2.GoogleResponse;
+import com.nhnacademy.memberapi.dto.oauth2.OAuth2Response;
+import com.nhnacademy.memberapi.dto.oauth2.PaycoResponse;
 import com.nhnacademy.memberapi.entity.Member;
+import com.nhnacademy.memberapi.exception.OAuthEmailNotFoundException;
 import com.nhnacademy.memberapi.repository.MemberRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -28,16 +32,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2Response oAuth2Response;
         if(registrationId.equals("google")){
             oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
-        }else if (registrationId.equals("kakao")){
-            oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
-        }else if (registrationId.equals("naver")){
-            oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
+        }else if (registrationId.equals("payco")){
+            oAuth2Response = new PaycoResponse(oAuth2User.getAttributes());
         } else {
+            // 해당하는 provider가 없음
             return null;
+        }
+        String memberEmail = oAuth2Response.getEmail();
+        if (memberEmail == null || memberEmail.isBlank()) {
+            throw new OAuthEmailNotFoundException("이메일을 찾을 수 없습니다.");
         }
 
         // DB에서 이메일로 조회
-        Optional<Member> existMember = memberRepository.findByMemberEmail(oAuth2Response.getEmail());
+        Optional<Member> existMember = memberRepository.findByMemberEmail(memberEmail);
 
         if (existMember.isPresent()) {
             // 이미 가입된 회원 (ROLE_MEMBER)

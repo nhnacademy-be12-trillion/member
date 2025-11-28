@@ -46,7 +46,11 @@ public class SocialLoginHandler extends SimpleUrlAuthenticationSuccessHandler {
             // 정보 전달용 (화면 표시용) - 이메일/이름은 보안 민감도가 낮으므로 파라미터로 넘겨도 됨
             String encodedName = URLEncoder.encode(customUserDetails.getName(), StandardCharsets.UTF_8);
 
-            response.sendRedirect("/signup.html?email=" + email + "&name=" + encodedName);
+            // OAuth ID 추출
+            String oauthId = customUserDetails.getProviderId();
+
+            // memberOauthId 파라미터 추가
+            response.sendRedirect("/signup.html?email=" + email + "&name=" + encodedName + "&oauthId=" + oauthId);
 
         } else {
             // 기존 회원은 쿠키에 Access/Refresh Token
@@ -77,7 +81,7 @@ public class SocialLoginHandler extends SimpleUrlAuthenticationSuccessHandler {
         cookie.setMaxAge(maxAge);
         cookie.setPath("/");
         cookie.setHttpOnly(false); // JS에서 읽을 수 있게 false (보안 강화하려면 true로 하고 API 통신만 해야 함)
-        // cookie.setSecure(true); // HTTPS 적용 시 주석 해제
+        // cookie.setSecure(true); // todo HTTPS 적용 시 주석 해제
         return cookie;
     }
 }

@@ -1,11 +1,13 @@
 package com.nhnacademy.memberapi.entity;
 
+import com.nhnacademy.memberapi.dto.request.AddressCreateRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Table(name = "Address")
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -29,7 +31,7 @@ public class Address {
     private String addressAlias;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false) // FK 컬럼명
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     public void update(String postCode, String base, String detail, String alias) {
@@ -37,5 +39,15 @@ public class Address {
         this.addressBase = base;
         this.addressDetail = detail;
         this.addressAlias = alias;
+    }
+
+    public static Address fromDto(AddressCreateRequest dto) {
+        return Address.builder()
+                .addressPostCode(dto.addressPostCode())
+                .addressBase(dto.addressBase())
+                .addressDetail(dto.addressDetail())
+                .addressAlias(dto.addressAlias())
+                // member 필드는 null로 두고, Service에서 setMember(member)로 연결
+                .build();
     }
 }

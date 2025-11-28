@@ -46,11 +46,11 @@ public class MemberService {
                 });
 
         Member member = Member.builder()
+                .memberEmail(request.memberEmail())
                 .memberPassword(passwordEncoder.encode(request.memberPassword()))
                 .memberName(request.memberName())
                 .memberContact(request.memberContact())
                 .memberBirth(request.memberBirth())
-                .memberEmail(request.memberEmail())
                 .memberState(MemberState.ACTIVE)
                 .memberRole(MemberRole.MEMBER)
                 .memberLastestLoginAt(LocalDate.now())
@@ -58,6 +58,11 @@ public class MemberService {
                 .memberAccumulateAmount(0)
                 .grade(defaultGrade)
                 .build();
+
+        // DTO를 Entity로 변환하고 양방향 관계 설정
+        Address newAddress = Address.fromDto(request.address());
+        // 양방향 관계 설정, Addresses를 리스트에 추가해주는 헬퍼 메서드
+        addAddressToMember(member, newAddress);
 
         memberRepository.save(member);
     }
@@ -93,6 +98,7 @@ public class MemberService {
         return MemberResponse.fromEntity(member);
     }
 
+    // 소셜 회원가임
     public void socialSignupMember(SocialSignupRequest request) {
         if (memberRepository.existsByMemberEmail(request.email())) {
             throw new UserAlreadyExistsException(request.email());
@@ -103,17 +109,22 @@ public class MemberService {
 
         Member member = Member.builder()
                 .memberEmail(request.email())
-                .memberName(request.name())
                 .memberPassword(UUID.randomUUID().toString()) // 비밀번호 랜덤
+                .memberName(request.name())
                 .memberBirth(request.birthDate()) // 생일 입력 받아서 저장
                 .memberContact(request.contact()) // 없으면 null
                 .memberState(MemberState.ACTIVE)
                 .memberRole(MemberRole.MEMBER)
                 .memberLastestLoginAt(LocalDate.now())
+                .memberOauthId(request.memberOauthId())
                 .memberPoint(0)
                 .memberAccumulateAmount(0)
                 .grade(defaultGrade)
                 .build();
+
+        // 주소 입력받아서 넣어야 함...
+        Address newAddress = Address.fromDto(request.address());
+        addAddressToMember(member, newAddress);
 
         memberRepository.save(member);
     }

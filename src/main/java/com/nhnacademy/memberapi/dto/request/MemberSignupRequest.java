@@ -1,5 +1,7 @@
 package com.nhnacademy.memberapi.dto.request;
 
+import com.nhnacademy.memberapi.entity.Address;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -18,5 +20,8 @@ public record MemberSignupRequest(
         @NotBlank
         String memberContact,
         @NotNull
-        LocalDate memberBirth // YYYY-MM-DD
+        LocalDate memberBirth, // YYYY-MM-DD
+        @NotNull
+        @Valid
+        AddressCreateRequest address
 ) {}
