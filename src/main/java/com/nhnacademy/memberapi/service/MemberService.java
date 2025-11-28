@@ -1,10 +1,9 @@
 package com.nhnacademy.memberapi.service;
 
-import com.nhnacademy.memberapi.dto.request.MemberSignupRequest;
-import com.nhnacademy.memberapi.dto.request.MemberUpdateRequest;
-import com.nhnacademy.memberapi.dto.request.SocialSignupRequest;
+import com.nhnacademy.memberapi.dto.request.*;
 import com.nhnacademy.memberapi.dto.response.MemberResponse;
 import com.nhnacademy.memberapi.entity.*;
+import com.nhnacademy.memberapi.exception.InvalidVerificationCodeException;
 import com.nhnacademy.memberapi.exception.UserAlreadyExistsException;
 import com.nhnacademy.memberapi.repository.GradeRepository;
 import com.nhnacademy.memberapi.repository.MemberRepository;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.UUID;
 
-//todo 중복 회원가입 방지 -> 이메일 인증
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -29,6 +27,7 @@ public class MemberService {
     private final GradeRepository gradeRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     // 회원가입
     public void signupMember(MemberSignupRequest request) {
@@ -117,5 +116,47 @@ public class MemberService {
                 .build();
 
         memberRepository.save(member);
+    }
+
+    // 비밀번호 재설정
+    public void resetPassword(PasswordResetRequest request) {
+        // 입력한 이메일을 가진 회원이 있고
+        Member member = memberRepository.findByMemberEmail(request.memberEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일을 가진 회원을 찾을 수 없습니다."));
+
+        // 그 이메일로 인증 성공 시
+        boolean isVerified = emailService.verifyCode(request.memberEmail(), request.verificationCode());
+
+        if (!isVerified) {
+            throw new InvalidVerificationCodeException("인증 코드가 일치하지 않거나 만료되었습니다.");
+        }
+
+        // 비밀번호 암호화 및 재설정
+        String encodedPassword = passwordEncoder.encode(request.newPassword());
+        member.setMemberPassword(encodedPassword);
+    }
+
+    // 아이디 찾기
+    public String findMemberEmail(FindMemberIdRequest request) {
+        Member member = memberRepository.findByMemberNameAndMemberContact(request.memberName(), request.memberContact())
+                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+
+        String email = member.getMemberEmail();
+        // 이메일 마스킹 처리
+        int atIndex = email.indexOf('@');
+        if (atIndex <= 2) {
+            return email.replaceAll("(?<=.{1}).(?=.*@)", "*");
+        }
+        String maskedEmail = email.substring(0, 2) + "****" + email.substring(atIndex - 4);
+
+        return maskedEmail + email.substring(atIndex);
+    }
+
+    private void addAddressToMember(Member member, Address address) {
+        // Address -> Member 관계 설정 (ManyToOne)
+        address.setMember(member);
+        // Member -> Address 관계 설정 (OneToMany)
+        // Member 엔티티의 addresses 리스트에 추가
+        member.getAddresses().add(address);
     }
 }

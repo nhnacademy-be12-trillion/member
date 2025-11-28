@@ -1,9 +1,9 @@
-package com.nhnacademy.memberapi.dto.response;
+package com.nhnacademy.memberapi.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-public record VerifyEmail(
+public record VerifyEmailRequest(
         @NotBlank
         @Email
         String email,

@@ -1,11 +1,11 @@
 package com.nhnacademy.memberapi.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
-import lombok.*;
 
 @Entity
 @Table(name = "Member")
@@ -31,7 +31,7 @@ public class Member {
     @Column(name = "member_name", nullable = false, length = 255)
     private String memberName;
 
-    @Column(name = "member_contact", length = 255)
+    @Column(name = "member_contact", unique = true, length = 255)
     private String memberContact;
 
     @Column(name = "member_birth", nullable = false)

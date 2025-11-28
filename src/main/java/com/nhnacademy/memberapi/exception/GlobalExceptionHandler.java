@@ -1,6 +1,7 @@
 package com.nhnacademy.memberapi.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.nhnacademy.memberapi.dto.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -86,7 +87,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmailSendException.class)
     public ResponseEntity<ErrorResponse> handleEmailSendException(EmailSendException e) {
         ErrorResponse response = ErrorResponse.of(
-                "Email Send Failed",
+                "이메일 전송 실패",
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // 400 Bad Request Error (인증번호 인증 오류)
+    @ExceptionHandler(InvalidVerificationCodeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidVerificationCodeException(InvalidVerificationCodeException e) {
+        ErrorResponse response = ErrorResponse.of(
+                "인증번호가 일치하지 않거나 만료되었습니다.",
                 HttpStatus.BAD_REQUEST.value(),
                 e.getMessage()
         );

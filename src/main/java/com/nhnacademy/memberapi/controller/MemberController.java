@@ -1,12 +1,8 @@
 package com.nhnacademy.memberapi.controller;
 
 import com.nhnacademy.memberapi.dto.CustomUserDetails;
-import com.nhnacademy.memberapi.dto.request.EmailRequest;
-import com.nhnacademy.memberapi.dto.request.MemberSignupRequest;
-import com.nhnacademy.memberapi.dto.request.MemberUpdateRequest;
-import com.nhnacademy.memberapi.dto.request.SocialSignupRequest;
+import com.nhnacademy.memberapi.dto.request.*;
 import com.nhnacademy.memberapi.dto.response.MemberResponse;
-import com.nhnacademy.memberapi.dto.response.VerifyEmail;
 import com.nhnacademy.memberapi.service.EmailService;
 import com.nhnacademy.memberapi.service.MemberService;
 import jakarta.validation.Valid;
@@ -49,6 +45,16 @@ public class MemberController {
         return ResponseEntity.ok(response);
     }
 
+    // 회원 수정
+    @PutMapping
+    public ResponseEntity<Void> updateMember(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody MemberUpdateRequest request
+    ){
+        memberService.updateMember(userDetails.getMemberId(), request);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
     // 회원 탈퇴
     @PostMapping("/withdraw")
     public ResponseEntity<Void> withdraw(
@@ -58,16 +64,6 @@ public class MemberController {
         memberService.withdrawMember(userDetails.getMemberId(), refreshToken);
         log.info("회원 탈퇴 완료: MemberEmail {}", userDetails.getMemberId());
         return ResponseEntity.ok().build();
-    }
-
-    // 회원 수정
-    @PutMapping
-    public ResponseEntity<Void> updateMember(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody MemberUpdateRequest request
-    ){
-        memberService.updateMember(userDetails.getMemberId(), request);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     // 일반 회원가입 인증번호 발송
@@ -80,7 +76,7 @@ public class MemberController {
 
     // 일반 회원가입 인증번호 검증
     @PostMapping("/emails/verify")
-    public ResponseEntity<Void> verifyEmail(@Valid @RequestBody VerifyEmail request){
+    public ResponseEntity<Void> verifyEmail(@Valid @RequestBody VerifyEmailRequest request){
         boolean isVerified = emailService.verifyCode(request.email(),  request.code());
         if(isVerified){
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -89,5 +85,20 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
+
+    // 본인 인증이 완료되면 비밀번호 재설정
+    @PutMapping("/password/reset")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody PasswordResetRequest request){
+        memberService.resetPassword(request);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    // 전화번호와 이름으로 아이디 조회
+    @PostMapping("/findEmail")
+    public ResponseEntity<String> findId(@Valid @RequestBody FindMemberIdRequest request) {
+        String maskedEmail = memberService.findMemberEmail(request);
+        return ResponseEntity.status(HttpStatus.OK).body(maskedEmail);
+    }
+
 
 }
