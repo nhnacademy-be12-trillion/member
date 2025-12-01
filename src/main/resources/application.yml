@@ -1,22 +1,20 @@
-spring:
-  application:
-    name: member-service
-  profiles:
-    active: 'dev'
-
-  config:
-    import: configserver:${CONFIG_SERVER_URI:http://localhost:10418}
-  cloud:
-    config:
-      username: be12-team1
-      password: nhnacademy123!
-
-server:
-  port: ${SERVER_PORT}
-
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: ${EUREKA_URL}
+#spring:
+#  application:
+#    name: member-service
+#
+#  config:
+#    import: configserver:${CONFIG_SERVER_URI:http://localhost:10418}
+#  cloud:
+#    config:
+#      username: be12-team1
+#      password: nhnacademy123!
+#
+#server:
+#  port: ${SERVER_PORT}
+#
+#eureka:
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    service-url:
+#      defaultZone: ${EUREKA_URL}

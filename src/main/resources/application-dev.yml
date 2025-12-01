@@ -1,6 +1,3 @@
-server:
-  port: 10403
-
 spring:
   application:
     name: member-service
@@ -29,12 +26,32 @@ spring:
     oauth2:
       client:
         registration:
+          # 구글
           google:
             client-name: google
-            client-id: ${CLIENT_ID}
-            client-secret: ${CLIENT_SECRET}
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: https://trillion-book.shop/login/oauth2/google
             scope: profile,email
+          # PAYCO
+          payco:
+            client-id: ${PAYCO_CLIENT_ID}
+            client-secret: ${PAYCO_CLIENT_SECRET}
+            redirect-uri: "www.trillion-book.shop/login/oauth2/payco"
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            scope: public
+            client-name: Payco
+
+        provider:
+          # PAYCO provider 엔드포인트
+          payco:
+            authorization-uri: https://id.payco.com/oauth2.0/authorize
+            token-uri: https://id.payco.com/oauth2.0/token
+            # 사용자 정보 조회 URL (문서 기준 URL로 설정)
+            user-info-uri: https://apis-payco.krp.toastoven.net/payco/friends/find_member_v2.json
+            user-name-attribute: header # Payco의 응답 구조를 파싱하기 위한 기준 속성
+
   # H2 Database
   datasource:
     driver-class-name: org.h2.Driver
