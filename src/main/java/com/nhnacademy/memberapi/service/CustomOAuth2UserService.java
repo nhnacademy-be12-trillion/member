@@ -24,6 +24,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         this.memberRepository = memberRepository;
     }
 
+    // Spring Security의 loadUser Override
     @Override
     public OAuth2User loadUser(OAuth2UserRequest request) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(request);
@@ -54,6 +55,4 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return new CustomOAuth2User(oAuth2Response, "ROLE_GUEST");
         }
     }
-
-
 }

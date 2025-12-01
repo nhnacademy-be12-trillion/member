@@ -8,6 +8,10 @@ spring:
       username: be12-team1
       password: nhnacademy123!
 
+server:
+  port: ${SERVER_PORT}
+
+# 유레카 클라이언트 비활성화 설정
 eureka:
   client:
     register-with-eureka: true
