@@ -1,67 +1,16 @@
 spring:
   application:
-    name: MemberApi
-  profiles:
-    active: dev, env
-  data:
-    redis:
-      host: localhost
-      port: 6379
-  jpa:
-    show-sql: true
-      #hibernate:
-    #ddl-auto: validate
-    properties:
-      hibernate:
-        format_sql: true
-        show_sql: true
-  jwt:
-    secret: vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalajsfhalsjfhkqjknvazxv
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-name: google
-            client-id: ${CLIENT_ID}
-            client-secret: ${CLIENT_SECRET}
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
-            scope: profile,email
+    name: member-service
+  config:
+    import: configserver:${CONFIG_SERVER_URI:http://localhost:10418}
+  cloud:
+    config:
+      username: be12-team1
+      password: nhnacademy123!
 
-server:
-  port: ${SERVER_PORT}
-
-# 유레카 클라이언트 비활성화 설정
 eureka:
   client:
-    enabled: false
-
-#eureka:
-#  client:
-#    register-with-eureka: true
-#    fetch-registry: true
-#    service-url:
-#      defaultZone: ${EUREKA_URL}
-#  instance:
-#    prefer-ip-address: true
-#    instance-id: ${spring.application.name}:${server.port}
-#
-#management:
-#  endpoints:
-#    web:
-#      exposure:
-#        include: health,info
-#
-#logging:
-#  level:
-#    org:
-#      hibernate:
-#        orm:
-#          jdbc:
-#            bind: trace
-#      springframework:
-#        transaction:
-#          interceptor: trace
-#    com:
-#      nhnacademy:
-#        OrderApplication: DEBUG
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_URL}
