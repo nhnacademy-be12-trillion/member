@@ -2,7 +2,7 @@ name: member-service package
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "infra" ]
   workflow_dispatch:
 
 env:
