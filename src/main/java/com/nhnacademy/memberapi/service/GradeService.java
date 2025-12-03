@@ -1,7 +1,7 @@
 package com.nhnacademy.memberapi.service;
 
-import com.nhnacademy.memberapi.dto.request.GradeRequestDto;
-import com.nhnacademy.memberapi.dto.response.GradeResponseDto;
+import com.nhnacademy.memberapi.dto.request.GradeRequest;
+import com.nhnacademy.memberapi.dto.response.GradeResponse;
 import com.nhnacademy.memberapi.entity.Grade;
 import com.nhnacademy.memberapi.exception.GradeNotFoundException;
 import com.nhnacademy.memberapi.repository.GradeRepository;
@@ -25,27 +25,27 @@ public class GradeService {
 
     // 전체 조회
     @Transactional(readOnly = true)
-    public List<GradeResponseDto> getGrades() {
+    public List<GradeResponse> getGrades() {
         return gradeRepository.findAll().stream()
-                .map(GradeResponseDto::from)
+                .map(GradeResponse::from)
                 .collect(Collectors.toList());
     }
 
     // 단건 조회
     @Transactional(readOnly = true)
-    public GradeResponseDto getGrade(Long gradeId) {
+    public GradeResponse getGrade(Long gradeId) {
         Grade grade = gradeRepository.findById(gradeId)
                 .orElseThrow(() -> new GradeNotFoundException("Grade not found: " + gradeId));
-        return GradeResponseDto.from(grade);
+        return GradeResponse.from(grade);
     }
 
     // 등급 정책 수정
-    public GradeResponseDto updateGrade(Long gradeId, GradeRequestDto request) {
+    public GradeResponse updateGrade(Long gradeId, GradeRequest request) {
         Grade grade = gradeRepository.findById(gradeId)
                 .orElseThrow(() -> new GradeNotFoundException("Grade not found: " + gradeId));
 
-        grade.updatePolicy(request.getGradePointRatio(), request.getGradeCondition());
+        grade.updatePolicy(request.gradePointRatio(), request.gradeCondition());
 
-        return GradeResponseDto.from(grade);
+        return GradeResponse.from(grade);
     }
 }

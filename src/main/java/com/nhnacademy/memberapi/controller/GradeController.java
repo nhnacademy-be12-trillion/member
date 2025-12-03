@@ -1,7 +1,7 @@
 package com.nhnacademy.memberapi.controller;
 
-import com.nhnacademy.memberapi.dto.request.GradeRequestDto;
-import com.nhnacademy.memberapi.dto.response.GradeResponseDto;
+import com.nhnacademy.memberapi.dto.request.GradeRequest;
+import com.nhnacademy.memberapi.dto.response.GradeResponse;
 import com.nhnacademy.memberapi.service.GradeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,19 +21,19 @@ public class GradeController {
     private final GradeService gradeService;
 
     @GetMapping
-    public ResponseEntity<List<GradeResponseDto>> getGrades(){
+    public ResponseEntity<List<GradeResponse>> getGrades(){
         return ResponseEntity.ok(gradeService.getGrades());
     }
 
     @GetMapping("/{gradeId}")
-    public ResponseEntity<GradeResponseDto> getGrade(@PathVariable Long gradeId){
+    public ResponseEntity<GradeResponse> getGrade(@PathVariable Long gradeId){
         return ResponseEntity.ok(gradeService.getGrade(gradeId));
     }
 
 
     @PutMapping("/{gradeId}")
-    public ResponseEntity<GradeResponseDto> updateGrade(@PathVariable Long gradeId,
-                                                        @RequestBody GradeRequestDto gradeRequestDto){
-        return ResponseEntity.ok(gradeService.updateGrade(gradeId, gradeRequestDto));
+    public ResponseEntity<GradeResponse> updateGrade(@PathVariable Long gradeId,
+                                                     @RequestBody GradeRequest gradeRequest){
+        return ResponseEntity.ok(gradeService.updateGrade(gradeId, gradeRequest));
     }
 }
