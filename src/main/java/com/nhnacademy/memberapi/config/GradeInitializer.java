@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,14 +28,11 @@ public class GradeInitializer implements CommandLineRunner {
         List<Grade> missingGrades = new ArrayList<>();
 
         for (GradeName name : GradeName.values()) {
-
             // GradeName에 존재하는 등급명이 DB에 없다면
             if (gradeRepository.findByGradeName(name).isEmpty()) {
-
                 // 해당 등급 객체를 생성해서 insert
                 Grade missingGrade = createGradeData(name);
                 missingGrades.add(missingGrade);
-
                 log.warn("초기 등급 데이터 누락: {} 등급을 목록에 추가", name);
             }
         }
@@ -49,10 +47,10 @@ public class GradeInitializer implements CommandLineRunner {
     // GradeName에 따라 해당 등급의 초기 조건 데이터를 생성
     private Grade createGradeData(GradeName name) {
         return switch (name) {
-            case COMMON -> Grade.builder().gradeName(name).gradePointRatio(1).gradeCondition(0).build();
-            case ROYAL -> Grade.builder().gradeName(name).gradePointRatio(2).gradeCondition(100000).build();
-            case GOLD -> Grade.builder().gradeName(name).gradePointRatio(2).gradeCondition(200000).build();
-            case PLATINUM -> Grade.builder().gradeName(name).gradePointRatio(3).gradeCondition(300000).build();
+            case COMMON -> Grade.builder().gradeName(name).gradePointRatio(BigDecimal.valueOf(0.01)).gradeCondition(0).build();
+            case ROYAL -> Grade.builder().gradeName(name).gradePointRatio(BigDecimal.valueOf(0.02)).gradeCondition(100000).build();
+            case GOLD -> Grade.builder().gradeName(name).gradePointRatio(BigDecimal.valueOf(0.02)).gradeCondition(200000).build();
+            case PLATINUM -> Grade.builder().gradeName(name).gradePointRatio(BigDecimal.valueOf(0.03)).gradeCondition(300000).build();
         };
     }
 }
