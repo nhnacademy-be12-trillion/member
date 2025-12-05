@@ -30,10 +30,22 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
-    // 404 Not Found Error (회원을 찾을 수 없는 경우)
+    // 409 Conflict Error (이미 적립된 포인트/리뷰 중복 적립 시도)
+    @ExceptionHandler(DuplicatePointException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicatePointException(DuplicatePointException e) {
+        log.warn("중복된 포인트 적립 시도: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Duplicate Point Earned",
+                HttpStatus.CONFLICT.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    // 404 Not Found Error (Spring Security 관련 사용자를 찾을 수 없는 경우)
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(UsernameNotFoundException e) {
-        log.warn("사용자를 찾을 수 없음: {}", e.getMessage());
+        log.warn("사용자를 찾을 수 없음(Security): {}", e.getMessage());
         ErrorResponse response = ErrorResponse.of(
                 "User Not Found",
                 HttpStatus.NOT_FOUND.value(),
@@ -42,6 +54,53 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    // 404 Not Found Error (비즈니스 로직 상 회원을 찾을 수 없는 경우)
+    @ExceptionHandler(MemberNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleMemberNotFoundException(MemberNotFoundException e) {
+        log.warn("회원을 찾을 수 없음: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Member Not Found",
+                HttpStatus.NOT_FOUND.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    // 404 Not Found Error (포인트 내역을 찾을 수 없는 경우 - 환불 등)
+    @ExceptionHandler(PointHistoryNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePointHistoryNotFoundException(PointHistoryNotFoundException e) {
+        log.warn("포인트 내역을 찾을 수 없음: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Point History Not Found",
+                HttpStatus.NOT_FOUND.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    // 404 Not Found Error (등급을 찾을 수 없는 경우)
+    @ExceptionHandler(GradeNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleGradeNotFoundException(GradeNotFoundException e){
+        log.warn("등급을 찾을 수 없습니다: {}",e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Grade Not Found",
+                HttpStatus.NOT_FOUND.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    // 404 Not Found Error (포인트 정책을 찾을 수 없는 경우)
+    @ExceptionHandler(PointPolicyNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePolicyNotFoundException(PointPolicyNotFoundException e){
+        log.warn("포인트 정책을 찾을 수 없습니다: {}",e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Point Policy Not Found",
+                HttpStatus.NOT_FOUND.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
 
     // 400 Bad Request Error (@Valid 유효성 검사 실패 시)
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -63,13 +122,72 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    // 400 Bad Request Error (포인트 잔액 부족)
+    @ExceptionHandler(InsufficientPointsException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientPointsException(InsufficientPointsException e) {
+        log.warn("포인트 잔액 부족: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Insufficient Points",
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // 400 Bad Request Error (잘못된 포인트 정책 타입 요청)
+    @ExceptionHandler(InvalidPointPolicyTypeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPointPolicyTypeException(InvalidPointPolicyTypeException e) {
+        log.warn("유효하지 않은 포인트 정책 타입: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Invalid Point Policy Type",
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // 400 Bad Request Error (이메일 전송 오류)
+    @ExceptionHandler(EmailSendException.class)
+    public ResponseEntity<ErrorResponse> handleEmailSendException(EmailSendException e) {
+        log.error("이메일 전송 중 오류 발생: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Email Send Failed",
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // 400 Bad Request Error (인증번호 인증 오류)
+    @ExceptionHandler(InvalidVerificationCodeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidVerificationCodeException(InvalidVerificationCodeException e) {
+        log.warn("인증번호 검증 실패: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Invalid Verification Code",
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     // 401 Unauthorized Error (리프레시 토큰 유효성 검사 실패 시)
-    // todo 클라이언트는 이 응답을 받으면 로그인 페이지로 이동해야 함
     @ExceptionHandler(InvalidRefreshTokenException.class)
     public ResponseEntity<ErrorResponse> handleInvalidRefreshToken(InvalidRefreshTokenException e) {
         log.warn("리프레시 토큰 유효성 검사 실패: {}", e.getMessage());
         ErrorResponse response = ErrorResponse.of(
                 "Invalid Refresh Token",
+                HttpStatus.UNAUTHORIZED.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    // 401 Unauthorized Error (OAuth2 로그인 인증 필수 정보 누락)
+    @ExceptionHandler(OAuth2AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleOAuth2AuthenticationException(OAuth2AuthenticationException e) {
+        log.warn("OAuth2 인증 에러: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Authentication Required",
                 HttpStatus.UNAUTHORIZED.value(),
                 e.getMessage()
         );
@@ -87,55 +205,6 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
-
-    // 400 Bad Request Error (이메일 전송 오류)
-    @ExceptionHandler(EmailSendException.class)
-    public ResponseEntity<ErrorResponse> handleEmailSendException(EmailSendException e) {
-        log.error("이메일 전송 중 오류 발생: {}", e.getMessage());
-        ErrorResponse response = ErrorResponse.of(
-                "이메일 전송 실패",
-                HttpStatus.BAD_REQUEST.value(),
-                e.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
-
-    // 400 Bad Request Error (인증번호 인증 오류)
-    @ExceptionHandler(InvalidVerificationCodeException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidVerificationCodeException(InvalidVerificationCodeException e) {
-        log.warn("인증번호 검증 실패: {}", e.getMessage());
-        ErrorResponse response = ErrorResponse.of(
-                "인증번호가 일치하지 않거나 만료되었습니다.",
-                HttpStatus.BAD_REQUEST.value(),
-                e.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
-
-    // 401 Unauthorized Error (OAuth2 로그인 인증 필수 정보 누락)
-    @ExceptionHandler(OAuth2AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleOAuth2AuthenticationException(OAuth2AuthenticationException e) {
-        log.warn("OAuth2 인증 에러: {}", e.getMessage());
-        ErrorResponse response = ErrorResponse.of(
-                "인증이 필요합니다.",
-                HttpStatus.UNAUTHORIZED.value(),
-                e.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-    }
-
-    // 404 Not Found Error (등급을 찾을 수 없는 경우)
-    @ExceptionHandler(GradeNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleGradeNotFoundException(GradeNotFoundException e){
-        log.warn("등급을 찾을 수 없습니다: {}",e.getMessage());
-        ErrorResponse response = ErrorResponse.of(
-                "등급을 찾을 수 없습니다.",
-                HttpStatus.NOT_FOUND.value(),
-                e.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-    }
-
 
     // 500 Internal Server Error (그 외 모든 예외)
     @ExceptionHandler(Exception.class)
