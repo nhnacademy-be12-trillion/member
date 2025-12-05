@@ -37,20 +37,22 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // 토큰 검증이 불필요한 경로는 토큰 검증을 건너뛰고 즉시 filterChain.doFilter()를 호출하여 다음 필터로 요청을 넘긴다.
         // signup, login, reissue, logout은 Access Token 검증이 필요 없으므로 패스
-        if (requestURI.endsWith("/signup") || requestURI.endsWith("/login") || requestURI.equals("/reissue") || requestURI.equals("/") || requestURI.equals("/h2-console/**")) {
+        if (requestURI.equals("/api/members/signup") ||
+                requestURI.equals("/api/auth/login") ||
+                requestURI.equals("/api/auth/reissue") ||
+                requestURI.equals("/") ||
+                requestURI.startsWith("/h2-console")) {
+
             filterChain.doFilter(request, response);
             return;
         }
-
         // HTTP 요청 헤더에서 Authorization 값을 추출 (Bearer <token> 형식)
         String authorization = request.getHeader("Authorization");
-
         // 토큰이 없는 요청 (정상적인 "인증 안 된" 요청) 패스
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
-
         // Bearer 접두어를 제거하고 실제 JWT 값만 추출
         String token = authorization.split(" ")[1];
 

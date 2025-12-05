@@ -59,11 +59,22 @@ public class SecurityConfig {
         );
 
         http.authorizeHttpRequests((auth)->auth
-                .requestMatchers("/signup.html","login-success.html").permitAll()
-                .requestMatchers("/api/**", "/error", "/h2-console/**").permitAll()
+                // 인증이 필요 없는 공개 API만 명시적으로 허용
+                .requestMatchers(
+                        "/api/members/signup",
+                        "/api/auth/login",
+                        "/api/auth/reissue",
+                        "/api/members/emails/**",
+                        "/api/members/findEmail",
+                        "/error",
+                        "/h2-console/**"
+                ).permitAll()
+                // 나머지는 모두 인증 필요
+                .requestMatchers("/api/**").authenticated()
+                // 관리자 권한
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated());
 
+                .anyRequest().authenticated());
         // JWTFilter (다른 API 접근 시 토큰 검증용)
         http.addFilterBefore(new JWTFilter(jwtUtil, redisTemplate), AuthorizationFilter.class);
 
