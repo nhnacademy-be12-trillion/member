@@ -1,11 +1,14 @@
 package com.nhnacademy.memberapi.entity;
 
+import com.nhnacademy.memberapi.exception.InsufficientPointsException;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Entity
 @Table(name = "Member")
@@ -15,6 +18,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
+
+    private static final String PHONE_REGEX = "^01(?:0|1|[2-9])-(?:\\d{3}|\\d{4})-\\d{4}$";
+    private static final Pattern PHONE_PATTERN = Pattern.compile(PHONE_REGEX);
 
     // 기본 키 autoincrement
     @Id
@@ -72,5 +78,40 @@ public class Member {
         member.setMemberPassword("temppassword"); // 사용되지 않을 임시 비밀번호
         member.setMemberRole(role);
         return member;
+    }
+
+    public void adjustPoint(int amount) {
+        // 잔액이 음수가 되는 것을 방지
+        if (this.memberPoint + amount < 0) {
+            throw new InsufficientPointsException("포인트가 부족합니다.");
+        }
+        this.memberPoint += amount;
+    }
+
+    // 전화번호 저장 및 수정 전에 전화번호 정규화
+    @PrePersist // Insert 직전 실행
+    @PreUpdate  // Update 직전 실행
+    public void normalizeMemberContact() {
+        if (StringUtils.hasText(this.memberContact)) {
+            // 숫자만 남기고 모두 제거 (010-1234-5678 -> 01012345678)
+            String rawNumber = this.memberContact.replaceAll("[^0-9]", "");
+            // 길이에 따라 하이픈 포맷 적용
+            if (rawNumber.length() == 11) {
+                // 01012345678 -> 010-1234-5678
+                this.memberContact = String.format("%s-%s-%s",
+                        rawNumber.substring(0, 3),
+                        rawNumber.substring(3, 7),
+                        rawNumber.substring(7));
+            } else if (rawNumber.length() == 10) {
+                // 0111234567 -> 011-123-4567 (구형 번호 대응)
+                this.memberContact = String.format("%s-%s-%s",
+                        rawNumber.substring(0, 3),
+                        rawNumber.substring(3, 6),
+                        rawNumber.substring(6));
+            } else {
+                // 길이가 이상하면 원본(숫자만 있는 상태) 그대로
+                this.memberContact = rawNumber;
+            }
+        }
     }
 }

@@ -66,15 +66,7 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
-    // 일반 회원가입 인증번호 발송
-    @PostMapping("/emails")
-    public ResponseEntity<Void> sendEmail(@Valid @RequestBody EmailRequest request){
-        emailService.sendVerificationCode(request.email());
-        log.debug("인증번호 전송 완료 ({})", request.email());
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
-    // 일반 회원가입 인증번호 검증
+    // 인증번호 검증
     @PostMapping("/emails/verify")
     public ResponseEntity<Void> verifyEmail(@Valid @RequestBody VerifyEmailRequest request){
         boolean isVerified = emailService.verifyCode(request.email(),  request.code());
@@ -84,6 +76,20 @@ public class MemberController {
             log.warn("이메일 인증 실패");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
+    }
+
+    // 회원가입 전 인증번호 발송 API
+    @PostMapping("/signup/emails")
+    public ResponseEntity<Void> sendSignupEmail(@Valid @RequestBody EmailRequest request) {
+        memberService.sendSignupVerificationCode(request.email());
+        return ResponseEntity.ok().build();
+    }
+
+    // 비밀번호 재설정 전 인증번호 발송 API
+    @PostMapping("/password/emails")
+    public ResponseEntity<Void> sendResetPasswordEmail(@Valid @RequestBody EmailRequest request) {
+        memberService.sendResetPasswordVerificationCode(request.email());
+        return ResponseEntity.ok().build();
     }
 
     // 본인 인증이 완료되면 비밀번호 재설정

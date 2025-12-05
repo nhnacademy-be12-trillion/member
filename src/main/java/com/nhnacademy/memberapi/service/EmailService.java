@@ -1,9 +1,7 @@
 package com.nhnacademy.memberapi.service;
 
 import com.nhnacademy.memberapi.exception.EmailSendException;
-import com.nhnacademy.memberapi.exception.UserAlreadyExistsException;
 import com.nhnacademy.memberapi.repository.MemberRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -23,11 +21,6 @@ public class EmailService {
     private final MemberRepository memberRepository;
 
     public void sendVerificationCode(String email) {
-        // 중복 가입 체크
-         if (memberRepository.existsByMemberEmail(email)){
-             throw new UserAlreadyExistsException("이미 가입된 이메일입니다.");
-         }
-
         // 인증번호 6자리 난수 생성
         String code = createRandomCode();
 

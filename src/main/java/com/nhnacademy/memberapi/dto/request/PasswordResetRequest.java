@@ -9,9 +9,6 @@ public record PasswordResetRequest(
         @Email
         String memberEmail,
 
-        @NotBlank
-        String memberContact,
-
         // 사용자가 입력
         @NotBlank
         String verificationCode,
