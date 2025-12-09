@@ -79,14 +79,14 @@ public class MemberController {
     }
 
     // 회원가입 전 인증번호 발송 API
-    @PostMapping("/signup/emails")
+    @PostMapping("/emails/signup")
     public ResponseEntity<Void> sendSignupEmail(@Valid @RequestBody EmailRequest request) {
         memberService.sendSignupVerificationCode(request.email());
         return ResponseEntity.ok().build();
     }
 
     // 비밀번호 재설정 전 인증번호 발송 API
-    @PostMapping("/password/emails")
+    @PostMapping("/emails/password")
     public ResponseEntity<Void> sendResetPasswordEmail(@Valid @RequestBody EmailRequest request) {
         memberService.sendResetPasswordVerificationCode(request.email());
         return ResponseEntity.ok().build();
@@ -106,5 +106,20 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(maskedEmail);
     }
 
+    // 휴면 아이디 인증 코드 요청
+    @PostMapping("/dormant/request")
+    public ResponseEntity<Void> requestDormantCode(@Valid @RequestBody DormantCodeRequest request) {
+        // 이메일과 두레이 훅 URL을 받아 서비스 호출
+        memberService.requestDormantRelease(request.memberEmail(), request.doorayHookUrl());
+        return ResponseEntity.ok().build();
+    }
+
+    // 휴면 해제 인증번호 검증 및 상태 변경
+    @PostMapping("/dormant/verify")
+    public ResponseEntity<Void> verifyDormantCode(@Valid @RequestBody DormantVerifyRequest request) {
+        // 이메일과 사용자가 입력한 코드를 받아 검증
+        memberService.processDormantRelease(request.memberEmail(), request.verificationCode());
+        return ResponseEntity.ok().build();
+    }
 
 }

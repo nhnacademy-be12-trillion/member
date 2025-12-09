@@ -2,6 +2,7 @@ package com.nhnacademy.memberapi.jwt;
 
 import com.nhnacademy.memberapi.dto.oauth2.CustomOAuth2User;
 import com.nhnacademy.memberapi.entity.Member;
+import com.nhnacademy.memberapi.entity.MemberState;
 import com.nhnacademy.memberapi.entity.RefreshToken;
 import com.nhnacademy.memberapi.repository.MemberRepository;
 import com.nhnacademy.memberapi.repository.RefreshTokenRepository;
@@ -60,6 +61,17 @@ public class SocialLoginHandler extends SimpleUrlAuthenticationSuccessHandler {
                 return;
             }
             Member member = memberOp.get();
+
+            // 휴면 계정 체크
+            if (member.getMemberState() == MemberState.DORMANT) {
+                // 토큰 생성 및 저장 로직을 실행하지 않음
+
+                // 휴면 해제 페이지로 리다이렉트
+                // todo
+                String encodedEmail = URLEncoder.encode(member.getMemberEmail(), StandardCharsets.UTF_8);
+                response.sendRedirect("/dormant-auth.html?email=" + encodedEmail);
+                return;
+            }
 
             String accessToken = jwtUtil.createJwt(member.getMemberId(), "access", "ROLE_MEMBER", 1800000L);
             String refreshToken = jwtUtil.createJwt(member.getMemberId(), "refresh", "ROLE_MEMBER", 86400000L);

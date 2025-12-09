@@ -1,12 +1,17 @@
 package com.nhnacademy.memberapi.controller;
 
 import com.nhnacademy.memberapi.dto.request.LoginRequest;
+import com.nhnacademy.memberapi.dto.response.ErrorResponse;
 import com.nhnacademy.memberapi.dto.response.TokenResponse;
+import com.nhnacademy.memberapi.entity.MemberState;
+import com.nhnacademy.memberapi.exception.MemberStateConflictException;
 import com.nhnacademy.memberapi.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,11 +23,35 @@ public class AuthController {
 
     // 토큰을 body가 아닌 header에 설정
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest request) {
-        TokenResponse tokenResponse = authService.login(request);
-        return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION,"Bearer " + tokenResponse.accessToken())
-                .header("Refresh-Token", tokenResponse.refreshToken())
-                .build();
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+        try{
+            TokenResponse tokenResponse = authService.login(request);
+            return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION,"Bearer " + tokenResponse.accessToken())
+                    .header("Refresh-Token", tokenResponse.refreshToken())
+                    .build();
+        }catch (Exception ex) {
+            // 진짜 예외 원인 찾기
+            Throwable cause = ex;
+            if (ex instanceof org.springframework.security.authentication.InternalAuthenticationServiceException) {
+                cause = ex.getCause();
+            }
+
+            if (cause instanceof MemberStateConflictException e) {
+                if (e.getState() == MemberState.DORMANT) {
+                    return ResponseEntity
+                            .status(HttpStatus.FORBIDDEN)
+                            .body(ErrorResponse.of("DORMANT_ACCOUNT", HttpStatus.FORBIDDEN.value(), e.getMessage()));
+                } else {
+                    return ResponseEntity
+                            .status(HttpStatus.FORBIDDEN)
+                            .body(ErrorResponse.of("WITHDRAWAL_ACCOUNT", HttpStatus.FORBIDDEN.value(), e.getMessage()));
+                }
+            }
+            if (ex instanceof BadCredentialsException) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("아이디 또는 비밀번호가 일치하지 않습니다.");
+            }
+            throw new RuntimeException(ex);
+        }
     }
 
     @PostMapping("/logout")

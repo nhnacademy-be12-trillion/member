@@ -4,6 +4,7 @@ import com.nhnacademy.memberapi.dto.request.*;
 import com.nhnacademy.memberapi.dto.response.MemberResponse;
 import com.nhnacademy.memberapi.entity.*;
 import com.nhnacademy.memberapi.exception.InvalidVerificationCodeException;
+import com.nhnacademy.memberapi.exception.MemberNotFoundException;
 import com.nhnacademy.memberapi.exception.UserAlreadyExistsException;
 import com.nhnacademy.memberapi.repository.GradeRepository;
 import com.nhnacademy.memberapi.repository.MemberRepository;
@@ -29,6 +30,7 @@ public class MemberService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final DoorayService doorayService;
 
     // 회원가입
     public void signupMember(MemberSignupRequest request) {
@@ -193,5 +195,36 @@ public class MemberService {
             throw new UsernameNotFoundException("가입되지 않은 이메일입니다.");
         }
         emailService.sendVerificationCode(email);
+    }
+
+    // 휴면 해제 인증번호 요청
+    public void requestDormantRelease(String memberEmail, String doorayHookUrl) {
+        Member member = memberRepository.findByMemberEmail(memberEmail)
+                .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."));
+
+        if (member.getMemberState() != MemberState.DORMANT) {
+            throw new IllegalStateException("휴면 계정이 아닙니다.");
+        }
+
+        // 인증번호 발송
+        doorayService.sendDormantVerificationCode(memberEmail, doorayHookUrl);
+    }
+
+    // 휴면 해제 인증 수행 및 상태 변경
+    public void processDormantRelease(String memberEmail, String verificationCode) {
+        Member member = memberRepository.findByMemberEmail(memberEmail)
+                .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."));
+
+        // 인증번호 검증
+        boolean isVerified = doorayService.verifyDormantCode(memberEmail, verificationCode);
+        if (!isVerified) {
+            throw new InvalidVerificationCodeException("인증번호가 일치하지 않거나 만료되었습니다.");
+        }
+
+        // 상태 변경 (DORMANT -> ACTIVE)
+        member.setMemberState(MemberState.ACTIVE);
+        member.setMemberLastestLoginAt(LocalDate.now()); // 로그인 날짜 최신화
+
+        memberRepository.save(member);
     }
 }

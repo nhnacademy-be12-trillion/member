@@ -47,7 +47,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberState memberState;
 
-    @Column(name = "member_latest_login_at", nullable = false)
+    @Column(name = "member_lastest_login_at", nullable = false)
     private LocalDate memberLastestLoginAt;
 
     @Column(name = "member_role", nullable = false)

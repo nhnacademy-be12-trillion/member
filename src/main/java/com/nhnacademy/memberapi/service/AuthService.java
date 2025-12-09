@@ -47,12 +47,9 @@ public class AuthService {
         Member member = memberRepository.findById(userDetails.getMemberId())
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
 
-        // 탈퇴/휴면 계정 로그인 방지 로직
-        if (member.getMemberState() == MemberState.WITHDRAWAL) {
-            throw new MemberStateConflictException("탈퇴한 회원입니다.");
-        }
+        // 로그인 시간 갱신 전 방어 코드
         if (member.getMemberState() == MemberState.DORMANT) {
-            throw new MemberStateConflictException("휴면 계정입니다.");
+            throw new MemberStateConflictException("휴면 계정입니다.", MemberState.DORMANT);
         }
 
         // 로그인 시간 갱신

@@ -41,7 +41,9 @@ public class JWTFilter extends OncePerRequestFilter {
                 requestURI.equals("/api/auth/login") ||
                 requestURI.equals("/api/auth/reissue") ||
                 requestURI.equals("/") ||
-                requestURI.startsWith("/h2-console")) {
+                requestURI.startsWith("/h2-console") ||
+                requestURI.startsWith("/api/members/dormant") ||
+                requestURI.equals("/dormant-auth.html")) {
 
             filterChain.doFilter(request, response);
             return;

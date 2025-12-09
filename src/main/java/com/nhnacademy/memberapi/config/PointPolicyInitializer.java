@@ -20,7 +20,6 @@ public class PointPolicyInitializer implements CommandLineRunner {
     private final PointPolicyRepository pointPolicyRepository;
     /*
      * 애플리케이션 시작 시 DB에 포인트 정책 데이터가 없다면 삽입
-     * 행 단위로 누락 확인
      */
     @Override
     public void run(String... args) throws Exception {

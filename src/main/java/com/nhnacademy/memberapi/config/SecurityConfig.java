@@ -61,10 +61,12 @@ public class SecurityConfig {
         http.authorizeHttpRequests((auth)->auth
                 // 인증이 필요 없는 공개 API만 명시적으로 허용
                 .requestMatchers(
+                        "dormant-auth.html",
                         "/api/members/signup",
                         "/api/auth/login",
                         "/api/auth/reissue",
                         "/api/members/emails/**",
+                        "/api/members/dormant/**",
                         "/api/members/findEmail",
                         "/error",
                         "/h2-console/**"

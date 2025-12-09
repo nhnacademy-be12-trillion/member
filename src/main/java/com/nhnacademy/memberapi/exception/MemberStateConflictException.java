@@ -1,7 +1,16 @@
 package com.nhnacademy.memberapi.exception;
 
-public class MemberStateConflictException extends RuntimeException {
-    public MemberStateConflictException(String message) {
-        super(message);
+import com.nhnacademy.memberapi.entity.MemberState;
+import lombok.Getter;
+import org.springframework.security.core.AuthenticationException;
+
+
+@Getter
+public class MemberStateConflictException extends AuthenticationException {
+    private final MemberState state;
+
+    public MemberStateConflictException(String msg, MemberState state) {
+        super(msg);
+        this.state = state;
     }
 }
