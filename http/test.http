@@ -10,7 +10,8 @@
 ### =======================================================================
 
 ### 1-1. 이메일 인증번호 발송
-POST {{host}}/api/members/emails
+# @no-redirect
+POST {{host}}/api/members/emails/signup
 Content-Type: {{contentType}}
 
 {
@@ -33,7 +34,7 @@ Content-Type: {{contentType}}
 
 {
   "memberEmail": "{{testEmail}}",
-  "verificationCode": "196272",
+  "verificationCode": "463712",
   "memberPassword": "{{testPassword}}",
   "memberName": "{{testName}}",
   "memberContact": "01012345678",
@@ -308,3 +309,50 @@ Refresh-Token: {{refreshToken}}
 POST {{host}}/api/members/withdraw
 Authorization: Bearer {{accessToken}}
 Refresh-Token: {{refreshToken}}
+
+
+### ======================================================================
+### 8. 두레이를 이용한 휴면 계정 처리
+### ======================================================================
+
+### 8-1. 로그인 (휴면 계정 로그인 시도)
+POST {{host}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "memberEmail": "{{testEmail}}",
+  "memberPassword": "{{testPassword}}"
+}
+
+> {%
+    // 응답 헤더에서 토큰 추출 및 전역 변수 저장
+    client.global.set("accessToken", response.headers.valueOf("Authorization").replace("Bearer ", ""));
+    client.global.set("refreshToken", response.headers.valueOf("Refresh-Token"));
+
+    client.log("Access Token Set: " + client.global.get("accessToken"));
+%}
+
+### 8-2. 휴면 해제 인증번호 요청
+POST http://localhost:8080/api/members/dormant/request
+Content-Type: application/json
+
+{
+  "memberEmail": "{{testEmail}}",
+  "doorayHookUrl": ""
+}
+
+### 8-3. 휴면 해제 인증
+POST http://localhost:8080/api/members/dormant/verify
+Content-Type: application/json
+
+{
+  "memberEmail": "{{testEmail}}",
+  "verificationCode": "441861"
+}
+
+
+
+#### 회원을 휴면 상태(DORMANT)로 변경
+#UPDATE members
+#SET member_state = 'DORMANT'
+#WHERE member_email = 'shhk2100@gmail.com';
