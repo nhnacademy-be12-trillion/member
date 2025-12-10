@@ -57,6 +57,8 @@ public class AuthService {
 
         String role = authentication.getAuthorities().iterator().next().getAuthority();
 
+        memberRepository.save(member);
+
         // 토큰 발급 및 Redis 저장
         return generateTokens(userDetails.getMemberId(), role);
     }

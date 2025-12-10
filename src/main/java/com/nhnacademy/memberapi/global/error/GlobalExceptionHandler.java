@@ -206,6 +206,42 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
+    // 403 Forbidden Error (접근 권한이 없는 경우)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
+        log.warn("접근 권한 없음: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Access Denied",
+                HttpStatus.FORBIDDEN.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    // 404 Not Found Error (주소 정보를 찾을 수 없는 경우)
+    @ExceptionHandler(AddressNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAddressNotFoundException(AddressNotFoundException e) {
+        log.warn("주소 정보를 찾을 수 없음: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Address Not Found",
+                HttpStatus.NOT_FOUND.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    // 400 Bad Request Error (주소 최대 등록 개수 초과)
+    @ExceptionHandler(MaxSizeException.class)
+    public ResponseEntity<ErrorResponse> handleMaxSizeException(MaxSizeException e) {
+        log.warn("허용된 최대 개수 초과: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Max Size Exceeded",
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     // 500 Internal Server Error (그 외 모든 예외)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception e) {

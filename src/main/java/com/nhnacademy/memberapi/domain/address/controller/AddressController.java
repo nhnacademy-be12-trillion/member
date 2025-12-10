@@ -51,12 +51,13 @@ public class AddressController {
     }
 
     // 주소 수정
-    @PutMapping
+    @PutMapping("/{addressId}")
     public ResponseEntity<Void> updateAddress(
             @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long addressId,
             @Valid @RequestBody AddressUpdateRequest request
     ) {
-        addressService.updateAddress(userDetails.getMemberId(), request);
+        addressService.updateAddress(userDetails.getMemberId(), addressId, request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

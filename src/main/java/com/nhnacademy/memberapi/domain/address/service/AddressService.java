@@ -1,12 +1,15 @@
 package com.nhnacademy.memberapi.domain.address.service;
 
 import com.nhnacademy.memberapi.domain.address.dto.AddressCreateRequest;
-import com.nhnacademy.memberapi.domain.address.dto.AddressUpdateRequest;
 import com.nhnacademy.memberapi.domain.address.dto.AddressResponse;
+import com.nhnacademy.memberapi.domain.address.dto.AddressUpdateRequest;
 import com.nhnacademy.memberapi.domain.address.entity.Address;
-import com.nhnacademy.memberapi.domain.member.entity.Member;
 import com.nhnacademy.memberapi.domain.address.repository.AddressRepository;
+import com.nhnacademy.memberapi.domain.member.entity.Member;
 import com.nhnacademy.memberapi.domain.member.repository.MemberRepository;
+import com.nhnacademy.memberapi.global.error.exception.AccessDeniedException;
+import com.nhnacademy.memberapi.global.error.exception.AddressNotFoundException;
+import com.nhnacademy.memberapi.global.error.exception.MaxSizeException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -30,7 +32,7 @@ public class AddressService {
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
 
         if (member.getAddresses().size() >= 10) {
-            throw new IllegalStateException("주소는 최대 10개까지만 등록할 수 있습니다.");
+            throw new MaxSizeException("주소는 최대 10개까지만 등록할 수 있습니다.");
         }
 
         Address address = Address.builder()
@@ -48,37 +50,31 @@ public class AddressService {
     // 전체 주소 조회
     @Transactional(readOnly = true)
     public List<AddressResponse> getAllAddresses(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+        if(!memberRepository.existsByMemberId(memberId)){
+            throw new UsernameNotFoundException("Member not found");
+        }
 
-        // Member 엔티티의 addresses 필드 활용 (Lazy Loading이 걸려있으므로 트랜잭션 필요)
-        return member.getAddresses().stream()
-                .map(AddressResponse::fromEntity)
-                .collect(Collectors.toList());
+        return addressRepository.findAllByMember_MemberId(memberId);
     }
 
     // 주소 조회
     @Transactional(readOnly = true)
     public AddressResponse getAddress(Long memberId, Long addressId) {
-        Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new UsernameNotFoundException("Address not found: " + addressId));
-
-        if (!address.getMember().getMemberId().equals(memberId)) {
-            throw new IllegalArgumentException("이 주소를 조회할 권한이 없습니다.");
-        }
+        Address address = addressRepository.findByAddressIdAndMember_MemberId(memberId, addressId)
+                .orElseThrow(() -> new AddressNotFoundException("주소를 찾을 수 없습니다. " + addressId));
 
         return AddressResponse.fromEntity(address);
     }
 
 
     // 주소 수정
-    public void updateAddress(Long memberId, @Valid AddressUpdateRequest request) {
-        Address address = addressRepository.findById(request.addressId())
-                .orElseThrow(() -> new UsernameNotFoundException("Address not found: " + request.addressId()));
+    public void updateAddress(Long memberId, Long addressId, @Valid AddressUpdateRequest request) {
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new AddressNotFoundException("주소를 찾을 수 없습니다. " + addressId));
 
         // 삭제 요청자의 주소가 맞는지 확인
         if (!address.getMember().getMemberId().equals(memberId)) {
-            throw new IllegalArgumentException("이 주소를 수정할 권한이 없습니다.");
+            throw new AccessDeniedException("이 주소를 수정할 권한이 없습니다.");
         }
 
         address.update(
@@ -92,11 +88,11 @@ public class AddressService {
     // 주소 삭제
     public void deleteAddress(Long memberId, Long addressId) {
         Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new UsernameNotFoundException("Address not found: " + addressId));
+                .orElseThrow(() -> new AddressNotFoundException("주소를 찾을 수 없습니다. " + addressId));
 
         // 삭제 요청자의 주소가 맞는지 확인
         if (!address.getMember().getMemberId().equals(memberId)) {
-            throw new IllegalArgumentException("이 주소를 삭제할 권한이 없습니다.");
+            throw new AccessDeniedException("이 주소를 삭제할 권한이 없습니다.");
         }
 
         addressRepository.delete(address);
