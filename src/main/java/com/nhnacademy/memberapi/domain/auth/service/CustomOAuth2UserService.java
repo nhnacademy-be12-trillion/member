@@ -27,7 +27,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     // Spring Security의 loadUser Override
     @Override
     public OAuth2User loadUser(OAuth2UserRequest request) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = super.loadUser(request);
+        OAuth2User oAuth2User = processOAuth2UserDelegate(request);
         String registrationId = request.getClientRegistration().getRegistrationId();
 
         OAuth2Response oAuth2Response;
@@ -54,5 +54,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             // 신규 회원. 아직 DB 저장 안 한 상태 (ROLE_GUEST)
             return new CustomOAuth2User(oAuth2Response, "ROLE_GUEST");
         }
+    }
+
+    protected OAuth2User processOAuth2UserDelegate(OAuth2UserRequest request) {
+        return super.loadUser(request);
     }
 }

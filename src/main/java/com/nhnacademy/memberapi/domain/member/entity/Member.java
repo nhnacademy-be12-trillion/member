@@ -10,7 +10,6 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 @Entity
 @Table(name = "Member")
@@ -20,10 +19,6 @@ import java.util.regex.Pattern;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
-
-    private static final String PHONE_REGEX = "^01(?:0|1|[2-9])-(?:\\d{3}|\\d{4})-\\d{4}$";
-    private static final Pattern PHONE_PATTERN = Pattern.compile(PHONE_REGEX);
-
     // 기본 키 autoincrement
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

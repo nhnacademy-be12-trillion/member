@@ -5,13 +5,11 @@ import com.nhnacademy.memberapi.domain.address.dto.AddressCreateRequest;
 import com.nhnacademy.memberapi.domain.address.dto.AddressResponse;
 import com.nhnacademy.memberapi.domain.address.dto.AddressUpdateRequest;
 import com.nhnacademy.memberapi.domain.address.service.AddressService;
-import com.nhnacademy.memberapi.domain.auth.jwt.JWTUtil;
 import com.nhnacademy.memberapi.security.WithMockAuthUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -34,8 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         // Spring Cloud Config 설정 비활성화
         "spring.cloud.config.enabled=false",
         "spring.cloud.config.import-check.enabled=false",
-        // JWT Secret 키 설정 (JWTUtil에서 필요)
-        "spring.jwt.secret=ksldjglkjdglkhakjfhayqweoripafjlahgkjdsah"
 })
 class AddressControllerTest {
 
@@ -46,13 +42,9 @@ class AddressControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private JWTUtil jwtUtil;
-
-    @MockitoBean
-    private StringRedisTemplate stringRedisTemplate;
-
-    @MockitoBean
     private AddressService addressService;
+
+
 
     @Test
     @DisplayName("주소 등록")

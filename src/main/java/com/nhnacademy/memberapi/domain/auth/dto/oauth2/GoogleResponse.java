@@ -10,11 +10,25 @@ public class GoogleResponse implements OAuth2Response {
     }
 
     @Override
-    public String getProvider() { return "google"; }
+    public String getProvider() {
+        return "google";
+    }
+
     @Override
-    public String getProviderId() { return attribute.get("sub").toString(); }
+    public String getProviderId() {
+        Object sub = attribute.get("sub");
+        return (sub != null) ? sub.toString() : null;
+    }
+
     @Override
-    public String getEmail() { return attribute.get("email").toString(); }
+    public String getEmail() {
+        Object email = attribute.get("email");
+        return (email != null) ? email.toString() : null;
+    }
+
     @Override
-    public String getName() { return attribute.get("name").toString(); }
+    public String getName() {
+        Object name = attribute.get("name");
+        return (name != null) ? name.toString() : null;
+    }
 }

@@ -1,7 +1,6 @@
 package com.nhnacademy.memberapi.domain.grade.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nhnacademy.memberapi.domain.auth.jwt.JWTUtil;
 import com.nhnacademy.memberapi.domain.grade.dto.GradeRequest;
 import com.nhnacademy.memberapi.domain.grade.dto.GradeResponse;
 import com.nhnacademy.memberapi.domain.grade.entity.GradeName;
@@ -18,7 +17,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -52,7 +50,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestPropertySource(properties = {
         "spring.cloud.config.enabled=false",
         "spring.cloud.config.import-check.enabled=false",
-        "spring.jwt.secret=testsecret"
 })
 class GradeControllerTest {
 
@@ -64,12 +61,6 @@ class GradeControllerTest {
 
     @MockitoBean
     private GradeService gradeService;
-
-    @MockitoBean
-    private JWTUtil jwtUtil;
-
-    @MockitoBean
-    private StringRedisTemplate stringRedisTemplate;
 
     // 테스트용 시큐리티 설정 (모든 요청 허용, CSRF 끔)
     @TestConfiguration
