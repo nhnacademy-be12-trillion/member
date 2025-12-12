@@ -1,16 +1,15 @@
 package com.nhnacademy.memberapi.domain.member.controller;
 
-import com.nhnacademy.memberapi.domain.member.dto.*;
 import com.nhnacademy.memberapi.domain.auth.dto.CustomUserDetails;
-import com.nhnacademy.memberapi.domain.member.dto.MemberResponse;
+import com.nhnacademy.memberapi.domain.member.dto.*;
 import com.nhnacademy.memberapi.domain.member.service.EmailService;
 import com.nhnacademy.memberapi.domain.member.service.MemberService;
+import com.nhnacademy.memberapi.global.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -39,7 +38,7 @@ public class MemberController {
     //회원 조회
     @GetMapping
     public ResponseEntity<MemberResponse> getMember(
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthUser CustomUserDetails userDetails
     ){
         MemberResponse response = memberService.getMember(userDetails.getMemberId());
         return ResponseEntity.ok(response);
@@ -48,7 +47,7 @@ public class MemberController {
     // 회원 수정
     @PutMapping
     public ResponseEntity<Void> updateMember(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @AuthUser CustomUserDetails userDetails,
             @Valid @RequestBody MemberUpdateRequest request
     ){
         memberService.updateMember(userDetails.getMemberId(), request);
@@ -58,7 +57,7 @@ public class MemberController {
     // 회원 탈퇴
     @PostMapping("/withdraw")
     public ResponseEntity<Void> withdraw(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @AuthUser CustomUserDetails userDetails,
             @RequestHeader(value = "Refresh-Token", required = false) String refreshToken
     ) {
         memberService.withdrawMember(userDetails.getMemberId(), refreshToken);
@@ -111,7 +110,7 @@ public class MemberController {
     public ResponseEntity<Void> requestDormantCode(@Valid @RequestBody DormantCodeRequest request) {
         // 이메일과 두레이 훅 URL을 받아 서비스 호출
         memberService.requestDormantRelease(request.memberEmail(), request.doorayHookUrl());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     // 휴면 해제 인증번호 검증 및 상태 변경
@@ -119,7 +118,7 @@ public class MemberController {
     public ResponseEntity<Void> verifyDormantCode(@Valid @RequestBody DormantVerifyRequest request) {
         // 이메일과 사용자가 입력한 코드를 받아 검증
         memberService.processDormantRelease(request.memberEmail(), request.verificationCode());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }
