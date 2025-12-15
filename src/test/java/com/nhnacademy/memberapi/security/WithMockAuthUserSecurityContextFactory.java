@@ -23,7 +23,7 @@ public class WithMockAuthUserSecurityContextFactory implements WithSecurityConte
                 .memberContact("010-1234-5678")
                 .memberBirth(java.time.LocalDate.of(2000, 1, 1))
                 .memberState(MemberState.ACTIVE)
-                .memberLastestLoginAt(java.time.LocalDate.now())
+                .memberLatestLoginAt(java.time.LocalDate.now())
                 .memberRole(MemberRole.valueOf(annotation.role()))
                 .memberPoint(0)
                 .memberAccumulateAmount(0)

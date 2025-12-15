@@ -67,7 +67,7 @@ class MemberControllerTest {
         realMember.setMemberContact("010-1234-5678");
         realMember.setMemberBirth(LocalDate.of(1990, 1, 1));
         realMember.setMemberState(MemberState.ACTIVE);
-        realMember.setMemberLastestLoginAt(LocalDate.now());
+        realMember.setMemberLatestLoginAt(LocalDate.now());
         realMember.setMemberPoint(1000);
         realMember.setMemberAccumulateAmount(0);
 

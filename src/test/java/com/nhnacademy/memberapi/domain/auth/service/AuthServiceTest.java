@@ -77,7 +77,7 @@ class AuthServiceTest {
                 .memberPassword("encoded_password")
                 .memberState(MemberState.ACTIVE)
                 .memberRole(MemberRole.MEMBER)
-                .memberLastestLoginAt(java.time.LocalDate.of(2025, 1, 1))
+                .memberLatestLoginAt(java.time.LocalDate.of(2025, 1, 1))
                 .build();
 
         mockUserDetails = new CustomUserDetails(mockMember);

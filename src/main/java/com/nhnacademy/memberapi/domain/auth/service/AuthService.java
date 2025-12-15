@@ -53,7 +53,7 @@ public class AuthService {
         }
 
         // 로그인 시간 갱신
-        member.setMemberLastestLoginAt(java.time.LocalDate.now());
+        member.setMemberLatestLoginAt(java.time.LocalDate.now());
 
         String role = authentication.getAuthorities().iterator().next().getAuthority();
 
@@ -96,26 +96,24 @@ public class AuthService {
 
     // 로그아웃
     public void logout(String refreshToken, String accessToken) {
-        // 로그아웃 시 Refresh Token 삭제
+        // 로그아웃 시 Refresh Token 삭제 (Redis)
         if (refreshToken != null && refreshTokenRepository.existsById(refreshToken)) {
             refreshTokenRepository.deleteById(refreshToken);
         }
 
-        String token = accessToken;
+        // Access Token 블랙리스트 처리
+        if (accessToken != null && accessToken.startsWith("Bearer ")) {
+            String token = accessToken.substring(7);
 
-        // Access Token 블랙 리스트 처리
-        if(accessToken != null && accessToken.startsWith("Bearer ")) {
-                token = accessToken.substring(7);
+            // 남은 유효시간 계산
+            long expiration = jwtUtil.getExpiration(token);
+            long now = new Date().getTime();
+            long remainTime = expiration - now;
+
+            if (remainTime > 0) {
+                redisTemplate.opsForValue()
+                        .set("BL:" + token, "logout", remainTime, TimeUnit.MILLISECONDS);
             }
-        long expiration = jwtUtil.getExpiration(token);
-        long now = new Date().getTime();
-        long remainTime = expiration - now;
-
-        // Access Token의 시간이 남아있으면 존재한다는 의미이므로
-        if (remainTime > 0) {
-            // Key: BL:토큰값, Value: logout
-            redisTemplate.opsForValue()
-                    .set("BL:" + token, "logout", remainTime, TimeUnit.MILLISECONDS);
         }
     }
 

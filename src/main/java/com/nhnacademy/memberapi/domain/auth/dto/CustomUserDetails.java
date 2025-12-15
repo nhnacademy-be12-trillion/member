@@ -1,6 +1,7 @@
 package com.nhnacademy.memberapi.domain.auth.dto;
 
 import com.nhnacademy.memberapi.domain.member.entity.Member;
+import com.nhnacademy.memberapi.domain.member.entity.MemberRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -36,6 +37,8 @@ public class CustomUserDetails implements UserDetails {
     public Long getMemberId() {
         return member.getMemberId();
     }
+
+    public MemberRole getMemberRole(){ return member.getMemberRole(); }
 
     @Override
     public boolean isAccountNonExpired() {

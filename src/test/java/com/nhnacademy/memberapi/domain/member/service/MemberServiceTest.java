@@ -73,7 +73,7 @@ class MemberServiceTest {
                 .memberRole(MemberRole.MEMBER)
                 .memberPoint(0)
                 .memberAccumulateAmount(0)
-                .memberLastestLoginAt(LocalDate.now())
+                .memberLatestLoginAt(LocalDate.now())
                 .grade(grade)
                 .build();
     }

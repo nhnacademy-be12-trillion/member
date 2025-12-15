@@ -67,7 +67,7 @@ public class MemberService {
                 .memberBirth(request.memberBirth())
                 .memberState(MemberState.ACTIVE)
                 .memberRole(MemberRole.MEMBER)
-                .memberLastestLoginAt(LocalDate.now())
+                .memberLatestLoginAt(LocalDate.now())
                 .memberPoint(0)
                 .memberAccumulateAmount(0)
                 .grade(defaultGrade)
@@ -132,7 +132,7 @@ public class MemberService {
                 .memberContact(request.contact()) // 없으면 null
                 .memberState(MemberState.ACTIVE)
                 .memberRole(MemberRole.MEMBER)
-                .memberLastestLoginAt(LocalDate.now())
+                .memberLatestLoginAt(LocalDate.now())
                 .memberOauthId(request.memberOauthId())
                 .memberPoint(0)
                 .memberAccumulateAmount(0)
@@ -228,7 +228,7 @@ public class MemberService {
 
         // 상태 변경 (DORMANT -> ACTIVE)
         member.setMemberState(MemberState.ACTIVE);
-        member.setMemberLastestLoginAt(LocalDate.now()); // 로그인 날짜 최신화
+        member.setMemberLatestLoginAt(LocalDate.now()); // 로그인 날짜 최신화
 
         memberRepository.save(member);
     }

@@ -1,6 +1,6 @@
 package com.nhnacademy.memberapi.global.config;
 
-import com.nhnacademy.memberapi.domain.auth.jwt.JWTFilter;
+import com.nhnacademy.memberapi.domain.auth.jwt.GatewayAuthenticationFilter;
 import com.nhnacademy.memberapi.domain.auth.jwt.JWTUtil;
 import com.nhnacademy.memberapi.domain.auth.jwt.SocialLoginHandler;
 import com.nhnacademy.memberapi.domain.auth.service.CustomOAuth2UserService;
@@ -17,7 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -61,7 +61,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests((auth)->auth
                 // 인증이 필요 없는 공개 API만 명시적으로 허용
                 .requestMatchers(
-                        "dormant-auth.html",
+                        "/dormant-auth.html",
                         "/api/members/signup",
                         "/api/auth/login",
                         "/api/auth/reissue",
@@ -77,8 +77,9 @@ public class SecurityConfig {
                 .requestMatchers("/admin/**").hasRole("ADMIN")
 
                 .anyRequest().authenticated());
-        // JWTFilter (다른 API 접근 시 토큰 검증용)
-        http.addFilterBefore(new JWTFilter(jwtUtil, redisTemplate), AuthorizationFilter.class);
+
+        // GatewayAuthenticationFilter 추가
+        http.addFilterBefore(new GatewayAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         http.sessionManagement((session) -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));

@@ -50,7 +50,7 @@ class PointHistoryRepositoryTest {
                 .memberName("테스터")
                 .memberBirth(LocalDate.of(1990, 1, 1))
                 .memberState(MemberState.ACTIVE)
-                .memberLastestLoginAt(LocalDate.now())
+                .memberLatestLoginAt(LocalDate.now())
                 .memberRole(MemberRole.MEMBER)
                 .memberPoint(0)
                 .memberAccumulateAmount(0)
