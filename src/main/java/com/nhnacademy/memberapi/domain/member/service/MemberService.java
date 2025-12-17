@@ -3,20 +3,18 @@ package com.nhnacademy.memberapi.domain.member.service;
 import com.nhnacademy.memberapi.domain.address.entity.Address;
 import com.nhnacademy.memberapi.domain.grade.entity.Grade;
 import com.nhnacademy.memberapi.domain.grade.entity.GradeName;
+import com.nhnacademy.memberapi.domain.grade.repository.GradeRepository;
 import com.nhnacademy.memberapi.domain.member.dto.*;
 import com.nhnacademy.memberapi.domain.member.entity.Member;
 import com.nhnacademy.memberapi.domain.member.entity.MemberRole;
 import com.nhnacademy.memberapi.domain.member.entity.MemberState;
-import com.nhnacademy.memberapi.domain.member.dto.MemberResponse;
+import com.nhnacademy.memberapi.domain.member.repository.MemberRepository;
 import com.nhnacademy.memberapi.global.error.exception.InvalidVerificationCodeException;
 import com.nhnacademy.memberapi.global.error.exception.MemberNotFoundException;
 import com.nhnacademy.memberapi.global.error.exception.UserAlreadyExistsException;
-import com.nhnacademy.memberapi.domain.grade.repository.GradeRepository;
-import com.nhnacademy.memberapi.domain.member.repository.MemberRepository;
-import com.nhnacademy.memberapi.domain.auth.repository.RefreshTokenRepository;
+import com.nhnacademy.memberapi.global.error.exception.UserNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +30,6 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final GradeRepository gradeRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final DoorayService doorayService;
@@ -42,8 +39,6 @@ public class MemberService {
         if (memberRepository.existsByMemberEmail(request.memberEmail())) {
             throw new UserAlreadyExistsException(request.memberEmail());
         }
-
-        // todo 이메일 전송 요청 먼저 보내야 함
         boolean isVerified = emailService.verifyCode(request.memberEmail(), request.verificationCode());
         if (!isVerified) {
             throw new InvalidVerificationCodeException("인증 코드가 일치하지 않거나 만료되었습니다.");
@@ -82,20 +77,16 @@ public class MemberService {
     }
 
     // 회원탈퇴 (Soft Delete)
-    public void withdrawMember(Long memberId, String refreshToken) {
+    public void withdrawMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+                .orElseThrow(() -> new UserNotFoundException("Member not found"));
         // 탈퇴 상태로 변경
         member.setMemberState(MemberState.WITHDRAWAL);
-        // 로그아웃 처리 (Refresh Token 삭제)
-        if (refreshToken != null && refreshTokenRepository.existsById(refreshToken)) {
-            refreshTokenRepository.deleteById(refreshToken);
-        }
     }
 
     public void updateMember(Long memberId, @Valid MemberUpdateRequest request) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+                .orElseThrow(() -> new UserNotFoundException("Member not found"));
         if (request.memberContact() != null && !request.memberContact().isBlank()) {
             member.setMemberContact(request.memberContact());
         }
@@ -111,7 +102,7 @@ public class MemberService {
     @Transactional(readOnly = true)
     public MemberResponse getMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+                .orElseThrow(() -> new UserNotFoundException("Member not found"));
         return MemberResponse.fromEntity(member);
     }
 
@@ -150,9 +141,8 @@ public class MemberService {
     public void resetPassword(@Valid PasswordResetRequest request) {
         // 입력한 이메일을 가진 회원이 있고
         Member member = memberRepository.findByMemberEmail(request.memberEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일을 가진 회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserNotFoundException("해당 이메일을 가진 회원을 찾을 수 없습니다."));
         // 그 이메일로 인증 성공 시
-        // todo 이메일 전송 요청 먼저 보내야 함. verifyCode는 이미 발급된 코드 확인용
         boolean isVerified = emailService.verifyCode(request.memberEmail(), request.verificationCode());
         if (!isVerified) {
             throw new InvalidVerificationCodeException("인증 코드가 일치하지 않거나 만료되었습니다.");
@@ -166,7 +156,7 @@ public class MemberService {
     // 아이디 찾기
     public String findMemberEmail(FindMemberIdRequest request) {
         Member member = memberRepository.findByMemberNameAndMemberContact(request.memberName(), request.memberContact())
-                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+                .orElseThrow(() -> new UserNotFoundException("Member not found"));
 
         String email = member.getMemberEmail();
         // 이메일 마스킹 처리
@@ -197,7 +187,7 @@ public class MemberService {
     // 비밀번호 재설정 시 회원인지 확인 및 이메일 인증
     public void sendResetPasswordVerificationCode(String email) {
         if (!memberRepository.existsByMemberEmail(email)) {
-            throw new UsernameNotFoundException("가입되지 않은 이메일입니다.");
+            throw new UserNotFoundException("가입되지 않은 이메일입니다.");
         }
         emailService.sendVerificationCode(email);
     }

@@ -2,11 +2,9 @@ package com.nhnacademy.memberapi.global.error;
 
 import com.nhnacademy.memberapi.global.error.exception.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -43,8 +41,8 @@ public class GlobalExceptionHandler {
     }
 
     // 404 Not Found Error (Spring Security 관련 사용자를 찾을 수 없는 경우)
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(UsernameNotFoundException e) {
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException e) {
         log.warn("사용자를 찾을 수 없음(Security): {}", e.getMessage());
         ErrorResponse response = ErrorResponse.of(
                 "User Not Found",
@@ -176,18 +174,6 @@ public class GlobalExceptionHandler {
         log.warn("리프레시 토큰 유효성 검사 실패: {}", e.getMessage());
         ErrorResponse response = ErrorResponse.of(
                 "Invalid Refresh Token",
-                HttpStatus.UNAUTHORIZED.value(),
-                e.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-    }
-
-    // 401 Unauthorized Error (OAuth2 로그인 인증 필수 정보 누락)
-    @ExceptionHandler(OAuth2AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleOAuth2AuthenticationException(OAuth2AuthenticationException e) {
-        log.warn("OAuth2 인증 에러: {}", e.getMessage());
-        ErrorResponse response = ErrorResponse.of(
-                "Authentication Required",
                 HttpStatus.UNAUTHORIZED.value(),
                 e.getMessage()
         );

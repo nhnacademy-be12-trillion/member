@@ -10,9 +10,9 @@ import com.nhnacademy.memberapi.domain.member.repository.MemberRepository;
 import com.nhnacademy.memberapi.global.error.exception.AccessDeniedException;
 import com.nhnacademy.memberapi.global.error.exception.AddressNotFoundException;
 import com.nhnacademy.memberapi.global.error.exception.MaxSizeException;
+import com.nhnacademy.memberapi.global.error.exception.UserNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +29,7 @@ public class AddressService {
     // 주소 추가 (최대 10개)
     public void addAddress(Long memberId, @Valid AddressCreateRequest request) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+                .orElseThrow(() -> new UserNotFoundException("Member not found"));
 
         if (member.getAddresses().size() >= 10) {
             throw new MaxSizeException("주소는 최대 10개까지만 등록할 수 있습니다.");
@@ -51,7 +51,7 @@ public class AddressService {
     @Transactional(readOnly = true)
     public List<AddressResponse> getAllAddresses(Long memberId) {
         if(!memberRepository.existsByMemberId(memberId)){
-            throw new UsernameNotFoundException("Member not found");
+            throw new UserNotFoundException("Member not found");
         }
 
         return addressRepository.findAllByMember_MemberId(memberId);

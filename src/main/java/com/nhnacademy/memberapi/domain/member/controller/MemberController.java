@@ -1,10 +1,8 @@
 package com.nhnacademy.memberapi.domain.member.controller;
 
-import com.nhnacademy.memberapi.domain.auth.dto.CustomUserDetails;
 import com.nhnacademy.memberapi.domain.member.dto.*;
 import com.nhnacademy.memberapi.domain.member.service.EmailService;
 import com.nhnacademy.memberapi.domain.member.service.MemberService;
-import com.nhnacademy.memberapi.global.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,30 +36,30 @@ public class MemberController {
     //회원 조회
     @GetMapping
     public ResponseEntity<MemberResponse> getMember(
-            @AuthUser CustomUserDetails userDetails
+            @RequestHeader("X-Member-Id") Long memberId
     ){
-        MemberResponse response = memberService.getMember(userDetails.getMemberId());
+        MemberResponse response = memberService.getMember(memberId);
         return ResponseEntity.ok(response);
     }
 
     // 회원 수정
     @PutMapping
     public ResponseEntity<Void> updateMember(
-            @AuthUser CustomUserDetails userDetails,
+            @RequestHeader("X-Member-Id") Long memberId,
             @Valid @RequestBody MemberUpdateRequest request
     ){
-        memberService.updateMember(userDetails.getMemberId(), request);
+        memberService.updateMember(memberId, request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     // 회원 탈퇴
     @PostMapping("/withdraw")
     public ResponseEntity<Void> withdraw(
-            @AuthUser CustomUserDetails userDetails,
+            @RequestHeader("X-Member-Id") Long memberId,
             @RequestHeader(value = "Refresh-Token", required = false) String refreshToken
     ) {
-        memberService.withdrawMember(userDetails.getMemberId(), refreshToken);
-        log.info("회원 탈퇴 완료: MemberEmail {}", userDetails.getMemberId());
+        memberService.withdrawMember(memberId);
+        log.info("회원 탈퇴 완료: MemberEmail {}", memberId);
         return ResponseEntity.ok().build();
     }
 

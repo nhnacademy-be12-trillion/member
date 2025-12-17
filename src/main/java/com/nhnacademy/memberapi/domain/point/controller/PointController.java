@@ -1,16 +1,10 @@
 package com.nhnacademy.memberapi.domain.point.controller;
 
-import com.nhnacademy.memberapi.domain.auth.dto.CustomUserDetails;
-import com.nhnacademy.memberapi.domain.point.dto.BookPointRequest;
-import com.nhnacademy.memberapi.domain.point.dto.PointRefundRequest;
-import com.nhnacademy.memberapi.domain.point.dto.PointUseRequest;
-import com.nhnacademy.memberapi.domain.point.dto.ReviewPointRequest;
-import com.nhnacademy.memberapi.domain.point.dto.PointHistoryResponse;
+import com.nhnacademy.memberapi.domain.point.dto.*;
 import com.nhnacademy.memberapi.domain.point.service.PointHistoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,35 +19,35 @@ public class PointController {
     // 포인트 사용 내역 조회 (마이페이지)
     @GetMapping("/histories")
     public ResponseEntity<List<PointHistoryResponse>> getPointHistories(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @RequestHeader("X-Member-Id") Long memberId
             ) {
-        return ResponseEntity.ok(pointHistoryService.getHistories(customUserDetails.getMemberId()));
+        return ResponseEntity.ok(pointHistoryService.getHistories(memberId));
     }
 
     // 회원 가입 적립
     @PostMapping("/signup")
-    public ResponseEntity<Void> awardSignupPoints(@AuthenticationPrincipal CustomUserDetails customUserDetails){
-        pointHistoryService.awardSignupPoints(customUserDetails.getMemberId());
+    public ResponseEntity<Void> awardSignupPoints(@RequestHeader("X-Member-Id") Long memberId){
+        pointHistoryService.awardSignupPoints(memberId);
         return ResponseEntity.ok().build();
     }
 
     // 도서 구매 포인트 적립 (주문 -> 회원)
     @PostMapping("/purchase")
     public ResponseEntity<Void> awardPurchasePoints(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestHeader("X-Member-Id") Long memberId,
             @RequestBody BookPointRequest request) {
 
-        pointHistoryService.awardPurchasePoints(customUserDetails.getMemberId(), request.orderId(), request.amount());
+        pointHistoryService.awardPurchasePoints(memberId, request.orderId(), request.amount());
         return ResponseEntity.ok().build();
     }
 
     // 리뷰 작성 포인트 적립 (리뷰 -> 회원)
     @PostMapping("/review")
     public ResponseEntity<Void> awardReviewPoints(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestHeader("X-Member-Id") Long memberId,
             @RequestBody ReviewPointRequest request) {
 
-        pointHistoryService.awardReviewPoints(customUserDetails.getMemberId(), request);
+        pointHistoryService.awardReviewPoints(memberId, request);
         return ResponseEntity.ok().build();
     }
 
@@ -69,10 +63,10 @@ public class PointController {
     // 포인트 사용 (주문 -> 회원)
     @PostMapping("/use")
     public ResponseEntity<Void> usePoints(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestHeader("X-Member-Id") Long memberId,
             @RequestBody PointUseRequest request) {
 
-        pointHistoryService.usePoints(customUserDetails.getMemberId(), request.orderId(), request.amount());
+        pointHistoryService.usePoints(memberId, request.orderId(), request.amount());
         return ResponseEntity.ok().build();
     }
 }

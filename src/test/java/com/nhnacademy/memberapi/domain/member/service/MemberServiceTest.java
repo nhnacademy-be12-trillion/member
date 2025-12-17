@@ -2,7 +2,6 @@ package com.nhnacademy.memberapi.domain.member.service;
 
 import com.nhnacademy.memberapi.domain.address.dto.AddressCreateRequest;
 import com.nhnacademy.memberapi.domain.address.entity.Address;
-import com.nhnacademy.memberapi.domain.auth.repository.RefreshTokenRepository;
 import com.nhnacademy.memberapi.domain.grade.entity.Grade;
 import com.nhnacademy.memberapi.domain.grade.entity.GradeName;
 import com.nhnacademy.memberapi.domain.grade.repository.GradeRepository;
@@ -47,9 +46,6 @@ class MemberServiceTest {
 
     @Mock
     private GradeRepository gradeRepository;
-
-    @Mock
-    private RefreshTokenRepository refreshTokenRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -138,18 +134,15 @@ class MemberServiceTest {
     void withdrawMember() {
         // given
         Long memberId = 1L;
-        String refreshToken = "refreshTokenValue";
         Member member = createMember(memberId, "test@nhn.com");
 
         given(memberRepository.findById(memberId)).willReturn(Optional.of(member));
-        given(refreshTokenRepository.existsById(refreshToken)).willReturn(true);
 
         // when
-        memberService.withdrawMember(memberId, refreshToken);
+        memberService.withdrawMember(memberId);
 
         // then
         assertThat(member.getMemberState()).isEqualTo(MemberState.WITHDRAWAL);
-        verify(refreshTokenRepository).deleteById(refreshToken);
     }
 
     @Test
