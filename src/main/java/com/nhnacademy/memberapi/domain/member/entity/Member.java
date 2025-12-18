@@ -68,15 +68,6 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addresses = new ArrayList<>();
 
-    public static Member createForAuthentication(Long memberId, MemberRole role){
-        Member member = new Member();
-        member.setMemberId(memberId);
-        member.setMemberEmail("jwt@temp.com"); // 사용되지 않을 임시 이메일
-        member.setMemberPassword("temppassword"); // 사용되지 않을 임시 비밀번호
-        member.setMemberRole(role);
-        return member;
-    }
-
     public void adjustPoint(int amount) {
         // 잔액이 음수가 되는 것을 방지
         if (this.memberPoint + amount < 0) {

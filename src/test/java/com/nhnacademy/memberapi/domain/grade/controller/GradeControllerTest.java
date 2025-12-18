@@ -75,8 +75,8 @@
 //        }
 //    }
 //
-//    private GradeResponse createMockResponse(Long id, GradeName name) {
-//        return new GradeResponse(id, name, BigDecimal.valueOf(0.01), 1000);
+//    private GradeResponse createMockResponse(Long id, GradeName memberName) {
+//        return new GradeResponse(id, memberName, BigDecimal.valueOf(0.01), 1000);
 //    }
 //
 //    @Test

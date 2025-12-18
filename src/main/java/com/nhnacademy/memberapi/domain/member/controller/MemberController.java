@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/members")
+@RequestMapping("/members")
 public class MemberController {
 
     private final MemberService memberService;
@@ -66,7 +66,8 @@ public class MemberController {
     // 인증번호 검증
     @PostMapping("/emails/verify")
     public ResponseEntity<Void> verifyEmail(@Valid @RequestBody VerifyEmailRequest request){
-        boolean isVerified = emailService.verifyCode(request.email(),  request.code());
+        boolean isVerified = emailService.verifyCode(request.memberEmail(),  request.
+                verificationCode());
         if(isVerified){
             return ResponseEntity.status(HttpStatus.OK).build();
         }else {
@@ -78,14 +79,14 @@ public class MemberController {
     // 회원가입 전 인증번호 발송 API
     @PostMapping("/emails/signup")
     public ResponseEntity<Void> sendSignupEmail(@Valid @RequestBody EmailRequest request) {
-        memberService.sendSignupVerificationCode(request.email());
+        memberService.sendSignupVerificationCode(request.memberEmail());
         return ResponseEntity.ok().build();
     }
 
     // 비밀번호 재설정 전 인증번호 발송 API
     @PostMapping("/emails/password")
     public ResponseEntity<Void> sendResetPasswordEmail(@Valid @RequestBody EmailRequest request) {
-        memberService.sendResetPasswordVerificationCode(request.email());
+        memberService.sendResetPasswordVerificationCode(request.memberEmail());
         return ResponseEntity.ok().build();
     }
 

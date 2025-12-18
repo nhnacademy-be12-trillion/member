@@ -108,7 +108,7 @@ class MemberServiceTest {
     @DisplayName("회원가입 실패 - 이미 존재하는 이메일")
     void signupMember_Fail_EmailExists() {
         MemberSignupRequest request = new MemberSignupRequest(
-                "duplicate@nhn.com", "123456", "pwd", "name", "010-1234-5678", LocalDate.now(), null
+                "duplicate@nhn.com", "123456", "pwd", "memberName", "010-1234-5678", LocalDate.now(), null
         );
         given(memberRepository.existsByMemberEmail(request.memberEmail())).willReturn(true);
 
@@ -120,7 +120,7 @@ class MemberServiceTest {
     @DisplayName("회원가입 실패 - 인증코드 불일치")
     void signupMember_Fail_InvalidCode() {
         MemberSignupRequest request = new MemberSignupRequest(
-                "test@nhn.com", "wrongCode", "pwd", "name", "010-1234-5678", LocalDate.now(), null
+                "test@nhn.com", "wrongCode", "pwd", "memberName", "010-1234-5678", LocalDate.now(), null
         );
         given(memberRepository.existsByMemberEmail(request.memberEmail())).willReturn(false);
         given(emailService.verifyCode(request.memberEmail(), request.verificationCode())).willReturn(false);

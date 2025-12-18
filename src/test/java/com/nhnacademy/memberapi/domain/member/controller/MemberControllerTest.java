@@ -120,7 +120,7 @@ class MemberControllerTest {
     @DisplayName("이메일 인증 코드 검증")
     void verifyEmail() throws Exception {
         VerifyEmailRequest request = new VerifyEmailRequest("test@nhn.com", "123456");
-        given(emailService.verifyCode(request.email(), request.code())).willReturn(true);
+        given(emailService.verifyCode(request.memberEmail(), request.verificationCode())).willReturn(true);
 
         mockMvc.perform(post("/api/members/emails/verify")
                         .contentType(MediaType.APPLICATION_JSON)

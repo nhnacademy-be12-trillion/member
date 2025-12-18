@@ -108,19 +108,19 @@ public class MemberService {
 
     // 소셜 회원가임
     public void socialSignupMember(SocialSignupRequest request) {
-        if (memberRepository.existsByMemberEmail(request.email())) {
-            throw new UserAlreadyExistsException(request.email());
+        if (memberRepository.existsByMemberEmail(request.memberEmail())) {
+            throw new UserAlreadyExistsException(request.memberEmail());
         }
 
         Grade defaultGrade = gradeRepository.findByGradeName(GradeName.COMMON)
                 .orElseGet(() -> gradeRepository.save(Grade.builder().gradeName(GradeName.COMMON).gradeCondition(0).gradePointRatio(BigDecimal.valueOf(0.01)).build()));
 
         Member member = Member.builder()
-                .memberEmail(request.email())
+                .memberEmail(request.memberEmail())
                 .memberPassword(UUID.randomUUID().toString()) // 비밀번호 랜덤
-                .memberName(request.name())
+                .memberName(request.memberName())
                 .memberBirth(request.birthDate()) // 생일 입력 받아서 저장
-                .memberContact(request.contact()) // 없으면 null
+                .memberContact(request.memberContact()) // 없으면 null
                 .memberState(MemberState.ACTIVE)
                 .memberRole(MemberRole.MEMBER)
                 .memberLatestLoginAt(LocalDate.now())
@@ -164,8 +164,7 @@ public class MemberService {
         if (atIndex <= 2) {
             return email.replaceAll("(?<=.{1}).(?=.*@)", "*");
         }
-        String maskedEmail = email.substring(0, 2) + "****" + email.substring(atIndex - 4);
-        return maskedEmail + email.substring(atIndex);
+        return email.substring(0, 2) + "****" + email.substring(atIndex - 4);
     }
 
     private void addAddressToMember(Member member, Address address) {

@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 public record VerifyEmailRequest(
         @NotBlank
         @Email
-        String email,
+        String memberEmail,
         @NotBlank
-        String code
+        String verificationCode
 ) {
 }
