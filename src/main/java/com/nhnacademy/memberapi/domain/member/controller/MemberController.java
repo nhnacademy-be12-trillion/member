@@ -53,8 +53,8 @@ public class MemberController {
     }
 
     // 회원 탈퇴
-    @PostMapping("/withdraw")
-    public ResponseEntity<Void> withdraw(
+    @PutMapping("/withdraw")
+    public ResponseEntity<Void> withdrawMember(
             @RequestHeader("X-Member-Id") Long memberId,
             @RequestHeader(value = "Refresh-Token", required = false) String refreshToken
     ) {

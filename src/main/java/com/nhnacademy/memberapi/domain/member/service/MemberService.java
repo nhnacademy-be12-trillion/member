@@ -9,10 +9,7 @@ import com.nhnacademy.memberapi.domain.member.entity.Member;
 import com.nhnacademy.memberapi.domain.member.entity.MemberRole;
 import com.nhnacademy.memberapi.domain.member.entity.MemberState;
 import com.nhnacademy.memberapi.domain.member.repository.MemberRepository;
-import com.nhnacademy.memberapi.global.error.exception.InvalidVerificationCodeException;
-import com.nhnacademy.memberapi.global.error.exception.MemberNotFoundException;
-import com.nhnacademy.memberapi.global.error.exception.UserAlreadyExistsException;
-import com.nhnacademy.memberapi.global.error.exception.UserNotFoundException;
+import com.nhnacademy.memberapi.global.error.exception.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -76,7 +73,7 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    // 회원탈퇴 (Soft Delete)
+    // 회원 탈퇴 (상태만 변경)
     public void withdrawMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new UserNotFoundException("Member not found"));
@@ -103,6 +100,15 @@ public class MemberService {
     public MemberResponse getMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new UserNotFoundException("Member not found"));
+
+        // 조회할 때 탈퇴 및 휴면 상태를 검사해서 토큰이 살아있는 경우 방지
+        if (member.getMemberState() == MemberState.WITHDRAWAL) {
+            throw new AccessDeniedException("이미 탈퇴한 회원입니다. 접근이 불가능합니다.");
+        }
+        if (member.getMemberState() == MemberState.DORMANT) {
+            throw new AccessDeniedException("휴면 계정입니다. 인증이 필요합니다.");
+        }
+
         return MemberResponse.fromEntity(member);
     }
 

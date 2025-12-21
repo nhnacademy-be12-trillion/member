@@ -29,7 +29,7 @@ public class EmailService {
         // 이메일 전송
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
-        message.setSubject("회원가입 인증번호");
+        message.setSubject("Trillion 인증번호");
         message.setText("인증번호: [" + code + "]");
         try{
             javaMailSender.send(message);
