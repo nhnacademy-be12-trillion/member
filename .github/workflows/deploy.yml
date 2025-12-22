@@ -64,8 +64,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            SERVICE_NAME1="member-peer1"
-            SERVICE_NAME2="member-peer2"
+            SERVICE_NAME1="trillion-member-peer"
 
             echo "SSH 접속 및 디렉토리 이동..."
             mkdir -p ${{ env.DEPLOY_DIR }}
@@ -74,19 +73,13 @@ jobs:
             echo "Docker Registry 로그인"
             echo ${{secrets.GHCR_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ env.REGISTRY_OWNER }} --password-stdin
 
-            echo "멤버 서비스 롤링 업데이트 시작"
+            echo "멤버 서비스 업데이트 시작"
 
-            echo "최신 이미지 Pull 및 Peer 1 재시작..."
-            docker compose pull ${SERVICE_NAME_1}
-            docker compose up -d --no-deps ${SERVICE_NAME_1}
+            echo "최신 이미지 Pull 및 재시작..."
+            docker compose pull ${SERVICE_NAME1}
+            docker compose up -d --no-deps ${SERVICE_NAME1}
             
-            sleep 10
-            
-            echo "최신 이미지 Pull 및 Peer 2 재시작..."
-            docker compose pull ${SERVICE_NAME_2}
-            docker compose up -d --no-deps ${SERVICE_NAME_2}
-            
-            echo "멤버 서비스 롤링 업데이트 완료!"
+            echo "멤버 서비스 업데이트 완료!"
           
           
             echo "Docker Registry 로그아웃..."
