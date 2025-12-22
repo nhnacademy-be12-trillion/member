@@ -5,8 +5,7 @@ WORKDIR /app
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} app.jar
 
-ENTRYPOINT ["java", "$JAVA_OPTS", "-jar", "app.jar"]
-#ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
 
 
 ## Dockerfile 내에서 VM 옵션을 환경 변수로 설정

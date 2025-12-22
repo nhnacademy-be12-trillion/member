@@ -8,7 +8,7 @@ on:
 env:
   REGISTRY_OWNER: nhnacademy-be12-trillion
   REGISTRY: ghcr.io
-  IMAGE_NAME: member
+  IMAGE_NAME: member-service
   JAVA_VERSION: 21
   DEPLOY_DIR: ~/msa-project
 
