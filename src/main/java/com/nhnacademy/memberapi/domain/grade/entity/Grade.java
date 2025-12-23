@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 // 등급 정책
 @Entity
-@Table(name = "Grade")
+@Table(name = "grade")
 @Getter
 @Builder
 @AllArgsConstructor

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 // 포인트 정책
 @Entity
-@Table(name = "PointPolicy")
+@Table(name = "pointPolicy")
 @Getter
 @Builder
 @NoArgsConstructor

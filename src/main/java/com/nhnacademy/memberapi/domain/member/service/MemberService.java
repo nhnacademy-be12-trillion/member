@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -125,7 +126,7 @@ public class MemberService {
                 .memberEmail(request.memberEmail())
                 .memberPassword(UUID.randomUUID().toString()) // 비밀번호 랜덤
                 .memberName(request.memberName())
-                .memberBirth(request.birthDate()) // 생일 입력 받아서 저장
+                .memberBirth(request.memberBirth()) // 생일 입력 받아서 저장
                 .memberContact(request.memberContact()) // 없으면 null
                 .memberState(MemberState.ACTIVE)
                 .memberRole(MemberRole.MEMBER)
@@ -226,5 +227,18 @@ public class MemberService {
         member.setMemberLatestLoginAt(LocalDate.now()); // 로그인 날짜 최신화
 
         memberRepository.save(member);
+    }
+
+    @Transactional
+    public void updateSocialInfo(Long memberId, SocialSignupRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("Member not found"));
+        member.setMemberBirth(request.memberBirth());
+
+        if (StringUtils.hasText(request.memberContact())) {
+            member.setMemberContact(request.memberContact());
+        }
+
+        member.setMemberRole(MemberRole.MEMBER);
     }
 }

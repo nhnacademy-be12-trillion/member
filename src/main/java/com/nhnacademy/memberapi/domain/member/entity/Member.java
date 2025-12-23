@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "Member")
+@Table(name = "member")
 @Getter
 @Setter
 @Builder
@@ -31,7 +31,7 @@ public class Member {
     @Column(name = "member_password", nullable = false, length = 255)
     private String memberPassword;
 
-    @Column(name = "member_name", nullable = false, length = 255)
+    @Column(name = "member_name", length = 255)
     private String memberName;
 
     @Column(name = "member_contact", unique = true, length = 255)
