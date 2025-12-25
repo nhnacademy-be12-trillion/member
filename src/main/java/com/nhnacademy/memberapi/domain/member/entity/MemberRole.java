@@ -1,5 +1,5 @@
 package com.nhnacademy.memberapi.domain.member.entity;
 
 public enum MemberRole {
-    ADMIN, MEMBER
+    ADMIN, MEMBER, GUEST
 }

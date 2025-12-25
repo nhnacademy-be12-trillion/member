@@ -1,6 +1,7 @@
 package com.nhnacademy.memberapi.domain.member.service;
 
 import com.nhnacademy.memberapi.domain.address.entity.Address;
+import com.nhnacademy.memberapi.domain.address.repository.AddressRepository;
 import com.nhnacademy.memberapi.domain.grade.entity.Grade;
 import com.nhnacademy.memberapi.domain.grade.entity.GradeName;
 import com.nhnacademy.memberapi.domain.grade.repository.GradeRepository;
@@ -8,6 +9,7 @@ import com.nhnacademy.memberapi.domain.member.dto.*;
 import com.nhnacademy.memberapi.domain.member.entity.Member;
 import com.nhnacademy.memberapi.domain.member.entity.MemberRole;
 import com.nhnacademy.memberapi.domain.member.entity.MemberState;
+import com.nhnacademy.memberapi.domain.member.event.MemberSignedUpEvent;
 import com.nhnacademy.memberapi.domain.member.repository.MemberRepository;
 import com.nhnacademy.memberapi.global.error.exception.*;
 import jakarta.validation.Valid;
@@ -31,6 +33,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final GradeRepository gradeRepository;
+    private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final DoorayService doorayService;
@@ -240,11 +243,36 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("Member not found"));
         member.setMemberBirth(request.memberBirth());
-
+        // 연락처가 입력된 경우에만 로직 수행
         if (StringUtils.hasText(request.memberContact())) {
+            // 해당 번호를 가진 회원이 존재하는지 확인
+            memberRepository.findByMemberContact(request.memberContact())
+                    .ifPresent(existingMember -> {
+                        if (!existingMember.getMemberId().equals(memberId)) {
+                            throw new DuplicateMemberException("이미 사용 중인 전화번호입니다.");
+                        }
+                    });
             member.setMemberContact(request.memberContact());
         }
 
         member.setMemberRole(MemberRole.MEMBER);
+
+        if (request.address() != null) {
+            Address address = Address.builder()
+                    .member(member)
+                    .addressBase(request.address().addressBase())
+                    .addressDetail(request.address().addressDetail())
+                    .addressPostCode(request.address().addressPostCode())
+                    .addressAlias(request.address().addressAlias())
+                    .build();
+
+            addressRepository.save(address);
+        }
+    }
+
+    public MemberResponse getMemberByOauthId(String oauthId) {
+        Member member = memberRepository.findByMemberOauthId(oauthId)
+                .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."));
+        return MemberResponse.fromEntity(member);
     }
 }

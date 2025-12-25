@@ -33,12 +33,28 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @PutMapping("/social-info")
+    public ResponseEntity<Void> updateSocialMember(
+            @RequestHeader("X-Member-Id") Long memberId, // Gateway가 헤더에 넣어준 ID
+            @RequestBody SocialSignupRequest request) {
+
+        memberService.updateSocialInfo(memberId, request);
+        return ResponseEntity.ok().build();
+    }
+
     //회원 조회
     @GetMapping
     public ResponseEntity<MemberResponse> getMember(
             @RequestHeader("X-Member-Id") Long memberId
     ){
         MemberResponse response = memberService.getMember(memberId);
+        return ResponseEntity.ok(response);
+    }
+
+    // 소셜 로그인 회원 조회
+    @GetMapping("/social/{oauthId}")
+    public ResponseEntity<MemberResponse> getMemberByOauthId(@PathVariable("oauthId") String oauthId) {
+        MemberResponse response = memberService.getMemberByOauthId(oauthId);
         return ResponseEntity.ok(response);
     }
 

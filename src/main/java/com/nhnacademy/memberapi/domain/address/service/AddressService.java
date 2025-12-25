@@ -9,7 +9,7 @@ import com.nhnacademy.memberapi.domain.member.entity.Member;
 import com.nhnacademy.memberapi.domain.member.repository.MemberRepository;
 import com.nhnacademy.memberapi.global.error.exception.AccessDeniedException;
 import com.nhnacademy.memberapi.global.error.exception.AddressNotFoundException;
-import com.nhnacademy.memberapi.global.error.exception.MaxSizeException;
+import com.nhnacademy.memberapi.global.error.exception.AddressMaxSizeException;
 import com.nhnacademy.memberapi.global.error.exception.UserNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class AddressService {
                 .orElseThrow(() -> new UserNotFoundException("Member not found"));
 
         if (member.getAddresses().size() >= 10) {
-            throw new MaxSizeException("주소는 최대 10개까지만 등록할 수 있습니다.");
+            throw new AddressMaxSizeException("주소는 최대 10개까지만 등록할 수 있습니다.");
         }
 
         Address address = Address.builder()

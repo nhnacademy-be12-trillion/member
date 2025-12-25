@@ -2,12 +2,12 @@ package com.nhnacademy.memberapi.global.error;
 
 import com.nhnacademy.memberapi.global.error.exception.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +22,18 @@ public class GlobalExceptionHandler {
         log.warn("회원가입 실패 - 이미 존재하는 사용자: {}", e.getMessage());
         ErrorResponse response = ErrorResponse.of(
                 "User Already Exists",
+                HttpStatus.CONFLICT.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    // 409 Conflict Error (중복된 회원 정보 - 전화번호 등)
+    @ExceptionHandler(DuplicateMemberException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateMemberException(DuplicateMemberException e) {
+        log.warn("중복된 회원 정보: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Duplicate Member Info",
                 HttpStatus.CONFLICT.value(),
                 e.getMessage()
         );
@@ -100,6 +112,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    // 404 Not Found Error (주소 정보를 찾을 수 없는 경우)
+    @ExceptionHandler(AddressNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAddressNotFoundException(AddressNotFoundException e) {
+        log.warn("주소 정보를 찾을 수 없음: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Address Not Found",
+                HttpStatus.NOT_FOUND.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
     // 400 Bad Request Error (@Valid 유효성 검사 실패 시)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException e) {
@@ -168,16 +192,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    // 401 Unauthorized Error (리프레시 토큰 유효성 검사 실패 시)
-    @ExceptionHandler(InvalidRefreshTokenException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidRefreshToken(InvalidRefreshTokenException e) {
-        log.warn("리프레시 토큰 유효성 검사 실패: {}", e.getMessage());
+    // 400 Bad Request Error (주소 최대 등록 개수 초과)
+    @ExceptionHandler(AddressMaxSizeException.class)
+    public ResponseEntity<ErrorResponse> handleMaxSizeException(AddressMaxSizeException e) {
+        log.warn("허용된 최대 개수 초과: {}", e.getMessage());
         ErrorResponse response = ErrorResponse.of(
-                "Invalid Refresh Token",
-                HttpStatus.UNAUTHORIZED.value(),
+                "Max Size Exceeded",
+                HttpStatus.BAD_REQUEST.value(),
                 e.getMessage()
         );
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     // 403 Forbidden Error (탈퇴한 회원, 휴면 계정 등 로그인은 성공했으나 접근이 불가능한 경우)
@@ -202,30 +226,6 @@ public class GlobalExceptionHandler {
                 e.getMessage()
         );
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-    }
-
-    // 404 Not Found Error (주소 정보를 찾을 수 없는 경우)
-    @ExceptionHandler(AddressNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleAddressNotFoundException(AddressNotFoundException e) {
-        log.warn("주소 정보를 찾을 수 없음: {}", e.getMessage());
-        ErrorResponse response = ErrorResponse.of(
-                "Address Not Found",
-                HttpStatus.NOT_FOUND.value(),
-                e.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-    }
-
-    // 400 Bad Request Error (주소 최대 등록 개수 초과)
-    @ExceptionHandler(MaxSizeException.class)
-    public ResponseEntity<ErrorResponse> handleMaxSizeException(MaxSizeException e) {
-        log.warn("허용된 최대 개수 초과: {}", e.getMessage());
-        ErrorResponse response = ErrorResponse.of(
-                "Max Size Exceeded",
-                HttpStatus.BAD_REQUEST.value(),
-                e.getMessage()
-        );
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     // 500 Internal Server Error (그 외 모든 예외)
