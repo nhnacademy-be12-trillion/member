@@ -12,6 +12,8 @@ import com.nhnacademy.memberapi.domain.member.repository.MemberRepository;
 import com.nhnacademy.memberapi.global.error.exception.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -31,6 +34,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final DoorayService doorayService;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 회원가입
     public void signupMember(MemberSignupRequest request) {
@@ -72,6 +76,7 @@ public class MemberService {
         addAddressToMember(member, newAddress);
 
         memberRepository.save(member);
+        eventPublisher.publishEvent(new MemberSignedUpEvent(member.getMemberId()));
     }
 
     // 회원 탈퇴 (상태만 변경)
@@ -142,6 +147,7 @@ public class MemberService {
         addAddressToMember(member, newAddress);
 
         memberRepository.save(member);
+        eventPublisher.publishEvent(new MemberSignedUpEvent(member.getMemberId()));
     }
 
     // 비밀번호 재설정
