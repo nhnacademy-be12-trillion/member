@@ -11,6 +11,7 @@ import com.nhnacademy.memberapi.domain.member.entity.MemberRole;
 import com.nhnacademy.memberapi.domain.member.entity.MemberState;
 import com.nhnacademy.memberapi.domain.member.event.MemberSignedUpEvent;
 import com.nhnacademy.memberapi.domain.member.repository.MemberRepository;
+import com.nhnacademy.memberapi.domain.point.service.PointHistoryService;
 import com.nhnacademy.memberapi.global.error.exception.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class MemberService {
     private final EmailService emailService;
     private final DoorayService doorayService;
     private final ApplicationEventPublisher eventPublisher;
+    private final PointHistoryService pointHistoryService;
 
     // 회원가입
     public void signupMember(MemberSignupRequest request) {
@@ -80,6 +82,8 @@ public class MemberService {
 
         memberRepository.save(member);
         eventPublisher.publishEvent(new MemberSignedUpEvent(member.getMemberId()));
+        // 회원 가입 포인트 적립
+        pointHistoryService.awardSignupPoints(member.getMemberId());
     }
 
     // 회원 탈퇴 (상태만 변경)

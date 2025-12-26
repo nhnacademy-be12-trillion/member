@@ -2,16 +2,16 @@ package com.nhnacademy.memberapi.domain.point.service;
 
 import com.nhnacademy.memberapi.domain.grade.entity.Grade;
 import com.nhnacademy.memberapi.domain.member.entity.Member;
+import com.nhnacademy.memberapi.domain.member.repository.MemberRepository;
+import com.nhnacademy.memberapi.domain.point.dto.PointHistoryResponse;
+import com.nhnacademy.memberapi.domain.point.dto.ReviewPointRequest;
 import com.nhnacademy.memberapi.domain.point.entity.PointHistory;
 import com.nhnacademy.memberapi.domain.point.entity.PointPolicy;
 import com.nhnacademy.memberapi.domain.point.entity.PointPolicyCode;
-import com.nhnacademy.memberapi.domain.point.dto.ReviewPointRequest;
-import com.nhnacademy.memberapi.domain.point.dto.PointHistoryResponse;
+import com.nhnacademy.memberapi.domain.point.repository.PointHistoryRepository;
 import com.nhnacademy.memberapi.global.error.exception.DuplicatePointException;
 import com.nhnacademy.memberapi.global.error.exception.MemberNotFoundException;
 import com.nhnacademy.memberapi.global.error.exception.PointHistoryNotFoundException;
-import com.nhnacademy.memberapi.domain.member.repository.MemberRepository;
-import com.nhnacademy.memberapi.domain.point.repository.PointHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +38,7 @@ public class PointHistoryService {
         processPointTransaction(member, policy.getPointPolicyFixedAmount(), "회원가입 적립", null, null);
     }
 
-    // 리뷰 작성 적립 (리뷰 -> 회원)
+    // todo 리뷰 작성 적립 (리뷰 -> 회원)
     public void awardReviewPoints(Long memberId, ReviewPointRequest request) {
         Long reviewId = request.reviewId();
         // 중복 적립 방지
@@ -136,7 +136,7 @@ public class PointHistoryService {
 
     // 도서 반품 시 포인트 회수
     @Transactional
-    public void refundPurchasePoints(Long memberId, Long orderId) {
+    public void refundPurchasePoints(Long memberId, Long orderId, int amount) {
         Member member = getMember(memberId);
         // 주문 ID(orderId)로 적립된 이력 찾기
         List<PointHistory> histories = pointHistoryRepository.findAllByMember_MemberIdAndOrderId(memberId, orderId);
@@ -151,9 +151,8 @@ public class PointHistoryService {
                 continue;
             }
             // 적립된 포인트의 역방향 트랜잭션 금액을 계산해서 차감
-            int amountToRefund = -history.getPointHistoryPoint();
             String refundReason = "도서 반품 포인트 회수: " + history.getPointHistoryReason();
-            processPointTransaction(member, amountToRefund, refundReason, orderId, null);
+            processPointTransaction(member, -amount, refundReason, orderId, null);
         }
     }
 

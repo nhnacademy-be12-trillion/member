@@ -6,6 +6,7 @@ import com.nhnacademy.memberapi.client.order.saga.domain.OrderPointSagaLog;
 import com.nhnacademy.memberapi.client.order.saga.domain.OrderPointSagaLogId;
 import com.nhnacademy.memberapi.client.order.saga.domain.OrderSagaType;
 import com.nhnacademy.memberapi.client.order.saga.repository.OrderPointSagaRepository;
+import com.nhnacademy.memberapi.domain.point.service.PointHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderPointService {
     private final OrderPointSagaRepository orderPointSagaRepository;
+    private final PointHistoryService pointHistoryService;
 
     // 포인트 사용 (주문 생성)
     @Transactional
@@ -31,10 +33,8 @@ public class OrderPointService {
         if (orderPointSagaRepository.existsById(sagaLogId)) {
             return;
         }
-
         // 2. 포인트 사용
-        // TODO: 포인트 사용
-
+        pointHistoryService.usePoints(memberId, orderId, amount);
         // 3. 기록을 DB에 남겨 멱등성 보장
         orderPointSagaRepository.save(sagaLog);
     }
@@ -48,15 +48,12 @@ public class OrderPointService {
         Long memberId = request.memberId();
         Long orderId = request.orderId();
         int amount = request.point();
-
         // 1. 이미 처리된 작업이라면 즉시 리턴
         if (orderPointSagaRepository.existsById(sagaLogId)) {
             return;
         }
-
-        // 2. 포인트 증가
-        // TODO: 포인트 환불
-
+        // 2. 포인트 증가 (포인트 환불)
+        pointHistoryService.refundPurchasePoints(memberId, orderId, amount);
         // 3. 기록을 DB에 남겨 멱등성 보장
         orderPointSagaRepository.save(sagaLog);
     }
@@ -84,11 +81,11 @@ public class OrderPointService {
             return;
         }
 
-        // 3 포인트 증가
-        // TODO: 포인트 복구
+        // 3 포인트 증가 (포인트 복구)
+        pointHistoryService.refundPurchasePoints(memberId, orderId, amount);
 
         // 4. 기록을 DB에 남겨 멱등성 보장
-        orderPointSagaRepository.save(sagaLog);
+//        orderPointSagaRepository.save(sagaLog);
     }
 
     @Transactional
@@ -106,7 +103,8 @@ public class OrderPointService {
         }
 
         // 2. 포인트 적립
-        // TODO: 주문 상품의 구매 확정에 대해 포인트 적립
+        // 주문 상품의 구매 확정에 대해 포인트 적립
+        pointHistoryService.awardPurchasePoints(memberId, orderId, purchaseAmount);
 
         // 3. 기록을 DB에 남겨 멱등성 보장
         orderPointSagaRepository.save(sagaLog);
