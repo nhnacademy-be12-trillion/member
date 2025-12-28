@@ -46,6 +46,9 @@ public class MemberService {
         if (memberRepository.existsByMemberEmail(request.memberEmail())) {
             throw new UserAlreadyExistsException(request.memberEmail());
         }
+        if (memberRepository.existsByMemberContact(request.memberContact())) {
+            throw new DuplicateMemberContactException("이미 가입된 연락처입니다.");
+        }
         boolean isVerified = emailService.verifyCode(request.memberEmail(), request.verificationCode());
         if (!isVerified) {
             throw new InvalidVerificationCodeException("인증 코드가 일치하지 않거나 만료되었습니다.");
@@ -97,7 +100,13 @@ public class MemberService {
     public void updateMember(Long memberId, @Valid MemberUpdateRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new UserNotFoundException("Member not found"));
-        if (request.memberContact() != null && !request.memberContact().isBlank()) {
+        if (StringUtils.hasText(request.memberContact())) {
+            // 변경하려는 번호가 내 현재 번호와 다르다면 중복 체크 수행
+            if (!member.getMemberContact().equals(request.memberContact())) {
+                if (memberRepository.existsByMemberContact(request.memberContact())) {
+                    throw new DuplicateMemberContactException("이미 사용 중인 전화번호입니다.");
+                }
+            }
             member.setMemberContact(request.memberContact());
         }
         if (request.memberName() != null && !request.memberName().isBlank()) {
@@ -247,13 +256,13 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("Member not found"));
         member.setMemberBirth(request.memberBirth());
-        // 연락처가 입력된 경우에만 로직 수행
+
         if (StringUtils.hasText(request.memberContact())) {
-            // 해당 번호를 가진 회원이 존재하는지 확인
             memberRepository.findByMemberContact(request.memberContact())
                     .ifPresent(existingMember -> {
+                        // 내 번호가 아닌데 이미 존재하면 예외
                         if (!existingMember.getMemberId().equals(memberId)) {
-                            throw new DuplicateMemberException("이미 사용 중인 전화번호입니다.");
+                            throw new DuplicateMemberContactException("이미 사용 중인 전화번호입니다.");
                         }
                     });
             member.setMemberContact(request.memberContact());

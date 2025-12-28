@@ -29,8 +29,8 @@ public class GlobalExceptionHandler {
     }
 
     // 409 Conflict Error (중복된 회원 정보 - 전화번호 등)
-    @ExceptionHandler(DuplicateMemberException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateMemberException(DuplicateMemberException e) {
+    @ExceptionHandler(DuplicateMemberContactException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateMemberContactException(DuplicateMemberContactException e) {
         log.warn("중복된 회원 정보: {}", e.getMessage());
         ErrorResponse response = ErrorResponse.of(
                 "Duplicate Member Info",
