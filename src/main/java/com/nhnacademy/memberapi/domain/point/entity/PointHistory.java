@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 // 포인트 내역
 @Entity
-@Table(name = "pointHistory")
+@Table(name = "point_history")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PointHistory {

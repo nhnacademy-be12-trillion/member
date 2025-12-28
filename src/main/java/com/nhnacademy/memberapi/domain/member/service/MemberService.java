@@ -164,6 +164,7 @@ public class MemberService {
 
         memberRepository.save(member);
         eventPublisher.publishEvent(new MemberSignedUpEvent(member.getMemberId()));
+        pointHistoryService.awardSignupPoints(member.getMemberId());
     }
 
     // 비밀번호 재설정

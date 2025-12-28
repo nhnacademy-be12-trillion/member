@@ -38,7 +38,7 @@ public class PointHistoryService {
         processPointTransaction(member, policy.getPointPolicyFixedAmount(), "회원가입 적립", null, null);
     }
 
-    // todo 리뷰 작성 적립 (리뷰 -> 회원)
+    // 리뷰 작성 적립 (리뷰 -> 회원)
     public void awardReviewPoints(Long memberId, ReviewPointRequest request) {
         Long reviewId = request.reviewId();
         // 중복 적립 방지

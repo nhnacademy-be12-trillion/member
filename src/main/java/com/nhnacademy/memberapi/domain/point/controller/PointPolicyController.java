@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/members/admin/points/policies")
+@RequestMapping("/members/admin/points/policies")
 @RequiredArgsConstructor
 public class PointPolicyController {
 
