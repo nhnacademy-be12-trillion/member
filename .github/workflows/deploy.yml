@@ -39,14 +39,9 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }}
           registry: ${{ env.REGISTRY }}
 
-      - name: 이미지 태그 세팅
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.REGISTRY_OWNER }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=sha,format=short
-            type=raw,value=latest
+      - name: 새 태그 만들기
+        id: tag
+        run: echo "tag=sha-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
       - name: 도커 이미지 빌드 & 푸시
         uses: docker/build-push-action@v6
@@ -54,7 +49,9 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REGISTRY_OWNER }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.REGISTRY_OWNER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}
 
       - name: 파일 전송 및 배포
         uses: appleboy/ssh-action@v1.0.3
@@ -67,7 +64,7 @@ jobs:
             SERVICE_NAME1="trillion-member-peer"
             set -euo pipefail
             IMAGE_REPO="ghcr.io/nhnacademy-be12-trillion/member-service"
-            NEW_TAG=${{ steps.meta.outputs.version }}
+            NEW_TAG="${{ steps.tag.outputs.tag }}"
 
             # 현재 실행 중인 이미지 태그 추출 (peer1 기준)
             CURRENT_IMAGE=$(docker inspect --format='{{.Config.Image}}' "$SERVICE_NAME1" 2>/dev/null || echo "")
@@ -110,10 +107,13 @@ jobs:
               docker compose logs --tail=200 "$svc" || true
               return 1
             }
-
+            echo "SSH 접속 및 디렉토리 이동..."
+            mkdir -p ${{ env.DEPLOY_DIR }}
+            cd ${{ env.DEPLOY_DIR }}
+            
             deploy_with_tag() {
               local tag="$1"
-              export ORDER_IMAGE_TAG="$tag"
+              export MEMBER_IMAGE_TAG="$tag"
               # 해당 태그 이미지 미리 pull (실패 빨리 감지)
               docker pull "${IMAGE_REPO}:${tag}" >/dev/null
 
@@ -126,14 +126,10 @@ jobs:
               deploy_with_tag "$tag"
               echo "✅ 롤백 완료: $tag"
             }
-
-            echo "SSH 접속 및 디렉토리 이동..."
-            mkdir -p ${{ env.DEPLOY_DIR }}
-            cd ${{ env.DEPLOY_DIR }}
-
+            
             echo "Docker Registry 로그인"
             echo ${{ secrets.GHCR_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ env.REGISTRY_OWNER }} --password-stdin
-
+            
             if ! deploy_with_tag "$NEW_TAG"; then
               echo "❌ 배포 실패"
               if [ "$HAS_PREV" = "true" ]; then
@@ -144,6 +140,6 @@ jobs:
               fi
               exit 1
             fi
-
+            
             docker logout ${{ env.REGISTRY }}
-            echo "Order Service Cluster 배포 완료! (tag=$NEW_TAG)"
+            echo "Member Service 배포 완료! (tag=$NEW_TAG)"
