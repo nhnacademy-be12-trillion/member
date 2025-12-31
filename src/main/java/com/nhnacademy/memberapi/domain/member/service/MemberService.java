@@ -159,7 +159,7 @@ public class MemberService {
                 .build();
 
         // 주소 입력받아서 넣어야 함...
-        Address newAddress = Address.fromDto(request.address());
+        Address newAddress = Address.fromDto(request.memberAddress());
         addAddressToMember(member, newAddress);
 
         memberRepository.save(member);
@@ -256,6 +256,7 @@ public class MemberService {
     public void updateSocialInfo(Long memberId, SocialSignupRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("Member not found"));
+        member.setMemberName(request.memberName());
         member.setMemberBirth(request.memberBirth());
 
         if (StringUtils.hasText(request.memberContact())) {
@@ -271,13 +272,13 @@ public class MemberService {
 
         member.setMemberRole(MemberRole.MEMBER);
 
-        if (request.address() != null) {
+        if (request.memberAddress() != null) {
             Address address = Address.builder()
                     .member(member)
-                    .addressBase(request.address().addressBase())
-                    .addressDetail(request.address().addressDetail())
-                    .addressPostCode(request.address().addressPostCode())
-                    .addressAlias(request.address().addressAlias())
+                    .addressBase(request.memberAddress().addressBase())
+                    .addressDetail(request.memberAddress().addressDetail())
+                    .addressPostCode(request.memberAddress().addressPostCode())
+                    .addressAlias(request.memberAddress().addressAlias())
                     .build();
 
             addressRepository.save(address);

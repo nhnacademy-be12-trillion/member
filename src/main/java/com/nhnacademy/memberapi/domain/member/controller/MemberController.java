@@ -36,7 +36,7 @@ public class MemberController {
     @PutMapping("/social-info")
     public ResponseEntity<Void> updateSocialMember(
             @RequestHeader("X-Member-Id") Long memberId, // Gateway가 헤더에 넣어준 ID
-            @RequestBody SocialSignupRequest request) {
+            @RequestBody @Valid SocialSignupRequest request) {
 
         memberService.updateSocialInfo(memberId, request);
         return ResponseEntity.ok().build();

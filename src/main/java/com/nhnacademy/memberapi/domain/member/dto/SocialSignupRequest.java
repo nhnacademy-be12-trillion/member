@@ -22,8 +22,7 @@ public record SocialSignupRequest(
         String memberContact,
         @NotBlank
         String memberOauthId,
-
         @NotNull
         @Valid
-        AddressCreateRequest address
+        AddressCreateRequest memberAddress
 ) {}
