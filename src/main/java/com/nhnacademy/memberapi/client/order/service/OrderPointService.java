@@ -39,7 +39,7 @@ public class OrderPointService {
         orderPointSagaRepository.save(sagaLog);
     }
 
-    // 포인트 증가 (주문 취소, 주문 상품 환불)
+    // 사용한 포인트 반환 (주문 취소, 반품 시 사용했던 포인트 환불)
     @Transactional
     public void refundPoint(UUID sagaId, PointUsageRequest request) {
         OrderPointSagaLogId sagaLogId = new OrderPointSagaLogId(sagaId, OrderSagaType.REFUND_POINT);

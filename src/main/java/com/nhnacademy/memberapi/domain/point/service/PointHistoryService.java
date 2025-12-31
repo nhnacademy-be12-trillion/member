@@ -134,26 +134,18 @@ public class PointHistoryService {
         pointHistoryRepository.save(history);
     }
 
-    // 도서 반품 시 포인트 회수
+    // 결제 취소, 주문 취소, 도서 반품 시 사용한 포인트 다시 적립
     @Transactional
     public void refundPurchasePoints(Long memberId, Long orderId, int amount) {
         Member member = getMember(memberId);
         // 주문 ID(orderId)로 적립된 이력 찾기
-        List<PointHistory> histories = pointHistoryRepository.findAllByMember_MemberIdAndOrderId(memberId, orderId);
+        boolean hasHistory = pointHistoryRepository.existsByMember_MemberIdAndOrderId(memberId, orderId);
 
-        if (histories.isEmpty()) {
-            throw new PointHistoryNotFoundException("해당 주문 ID로 적립된 포인트 내역을 찾을 수 없습니다.");
+        if (!hasHistory) {
+            throw new PointHistoryNotFoundException("해당 주문 ID로 포인트 내역을 찾을 수 없습니다.");
         }
 
-        for (PointHistory history : histories) {
-            // 이미 사용되거나 환불된 이력 제외
-            if (history.getPointHistoryPoint() < 0) {
-                continue;
-            }
-            // 적립된 포인트의 역방향 트랜잭션 금액을 계산해서 차감
-            String refundReason = "도서 반품 포인트 회수: " + history.getPointHistoryReason();
-            processPointTransaction(member, -amount, refundReason, orderId, null);
-        }
+        String refundReason = "주문 취소, 도서 반품 포인트 반환";
+        processPointTransaction(member, amount, refundReason, orderId, null);
     }
-
 }

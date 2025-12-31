@@ -13,4 +13,5 @@ public interface PointHistoryRepository extends JpaRepository<PointHistory, Long
     // 포인트 이력 조회 (mypage)
     List<PointHistory> findAllByMember_MemberIdOrderByTransactionAtDesc(Long memberId);
     List<PointHistory> findAllByMember_MemberIdAndOrderId(Long memberId, Long orderId);
+    boolean existsByMember_MemberIdAndOrderId(Long memberMemberId, Long orderId);
 }
