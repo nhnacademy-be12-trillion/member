@@ -163,8 +163,6 @@ public class MemberService {
         addAddressToMember(member, newAddress);
 
         memberRepository.save(member);
-        eventPublisher.publishEvent(new MemberSignedUpEvent(member.getMemberId()));
-        pointHistoryService.awardSignupPoints(member.getMemberId());
     }
 
     // 비밀번호 재설정
@@ -283,6 +281,8 @@ public class MemberService {
 
             addressRepository.save(address);
         }
+        pointHistoryService.awardSignupPoints(member.getMemberId());
+        eventPublisher.publishEvent(new MemberSignedUpEvent(member.getMemberId()));
     }
 
     public MemberResponse getMemberByOauthId(String oauthId) {
