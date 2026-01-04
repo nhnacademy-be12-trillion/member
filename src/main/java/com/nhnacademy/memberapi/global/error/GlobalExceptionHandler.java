@@ -228,6 +228,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
+    // 400 Bad Request Error (올바르지 않은 값으로 수정하려는 경우)
+    @ExceptionHandler(InvalidValueException.class)
+    public ResponseEntity<ErrorResponse> handlerInvalidValueException(InvalidValueException e){
+        log.warn("올바르지 않은 값입니다. {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                "Invalid Value",
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     // 500 Internal Server Error (그 외 모든 예외)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception e) {

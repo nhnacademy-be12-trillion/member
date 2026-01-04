@@ -3,9 +3,12 @@ package com.nhnacademy.memberapi.domain.member.controller;
 import com.nhnacademy.memberapi.domain.member.dto.*;
 import com.nhnacademy.memberapi.domain.member.service.EmailService;
 import com.nhnacademy.memberapi.domain.member.service.MemberService;
+import com.nhnacademy.memberapi.global.error.exception.AccessDeniedException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -134,6 +137,26 @@ public class MemberController {
         // 이메일과 사용자가 입력한 코드를 받아 검증
         memberService.processDormantRelease(request.memberEmail(), request.verificationCode());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    // 전체 회원 조회 (관리자)
+    @GetMapping("/admin")
+    public ResponseEntity<Page<MemberAdminResponse>> getMembersByAdmin(Pageable pageable) {
+        Page<MemberAdminResponse> response = memberService.getMembersByAdmin(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    // 회원 상태/등급 수정 (관리자)
+    @PutMapping("/admin")
+    public ResponseEntity<Void> updateMemberByAdmin(
+            @RequestHeader("X-Member-Role") String memberRole,
+            @Valid @RequestBody MemberAdminUpdateRequest request
+    ) {
+        if (!"ADMIN".equals(memberRole)) {
+            throw new AccessDeniedException("권한이 없습니다.");
+        }
+        memberService.updateMemberByAdmin(request);
+        return ResponseEntity.ok().build();
     }
 
 }

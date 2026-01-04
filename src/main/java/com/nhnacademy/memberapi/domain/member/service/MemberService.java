@@ -17,6 +17,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -289,5 +291,38 @@ public class MemberService {
         Member member = memberRepository.findByMemberOauthId(oauthId)
                 .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."));
         return MemberResponse.fromEntity(member);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MemberAdminResponse> getMembersByAdmin(Pageable pageable) {
+        return memberRepository.findAll(pageable)
+                .map(MemberAdminResponse::fromEntity);
+    }
+
+    public void updateMemberByAdmin(MemberAdminUpdateRequest request) {
+        Member member = memberRepository.findById(request.memberId())
+                .orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없습니다."));
+
+        // 상태 변경
+        if (StringUtils.hasText(request.memberState())) {
+            try {
+                MemberState newState = MemberState.valueOf(request.memberState());
+                member.setMemberState(newState);
+            } catch (IllegalArgumentException e) {
+                throw new InvalidValueException("유효하지 않은 회원 상태입니다.");
+            }
+        }
+
+        // 등급 변경
+        if (StringUtils.hasText(request.gradeName())) {
+            try {
+                GradeName gName = GradeName.valueOf(request.gradeName());
+                Grade grade = gradeRepository.findByGradeName(gName)
+                        .orElseThrow(() -> new GradeNotFoundException("Grade not found"));
+                member.setGrade(grade);
+            } catch (IllegalArgumentException e) {
+                throw new InvalidValueException("유효하지 않은 등급 이름입니다.");
+            }
+        }
     }
 }
