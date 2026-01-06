@@ -89,7 +89,7 @@ class AddressServiceTest {
         Member member = createMember(memberId);
         Address address = createAddress(addressId, member);
 
-        given(addressRepository.findByAddressIdAndMember_MemberId(memberId, addressId)).willReturn(Optional.of(address));
+        given(addressRepository.findByMember_MemberIdAndAddressId(memberId, addressId)).willReturn(Optional.of(address));
 
         AddressResponse result = addressService.getAddress(memberId, addressId);
 
@@ -102,7 +102,7 @@ class AddressServiceTest {
         Long myMemberId = 1L;
         Long addressId = 10L;
 
-        given(addressRepository.findByAddressIdAndMember_MemberId(myMemberId, addressId))
+        given(addressRepository.findByMember_MemberIdAndAddressId(myMemberId, addressId))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> addressService.getAddress(myMemberId, addressId))

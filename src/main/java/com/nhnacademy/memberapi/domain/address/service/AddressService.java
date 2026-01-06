@@ -60,7 +60,7 @@ public class AddressService {
     // 주소 조회
     @Transactional(readOnly = true)
     public AddressResponse getAddress(Long memberId, Long addressId) {
-        Address address = addressRepository.findByAddressIdAndMember_MemberId(memberId, addressId)
+        Address address = addressRepository.findByMember_MemberIdAndAddressId(memberId, addressId)
                 .orElseThrow(() -> new AddressNotFoundException("주소를 찾을 수 없습니다. " + addressId));
 
         return AddressResponse.fromEntity(address);

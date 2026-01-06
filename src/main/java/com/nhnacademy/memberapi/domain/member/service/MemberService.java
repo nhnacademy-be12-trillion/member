@@ -189,12 +189,11 @@ public class MemberService {
                 .orElseThrow(() -> new UserNotFoundException("Member not found"));
 
         String email = member.getMemberEmail();
-        // 이메일 마스킹 처리
         int atIndex = email.indexOf('@');
         if (atIndex <= 2) {
             return email.replaceAll("(?<=.{1}).(?=.*@)", "*");
         }
-        return email.substring(0, 2) + "****" + email.substring(atIndex - 4);
+        return email.substring(0, 2) + "****" + email.substring(atIndex);
     }
 
     private void addAddressToMember(Member member, Address address) {

@@ -5,6 +5,7 @@ import com.nhnacademy.memberapi.domain.member.entity.Member;
 import com.nhnacademy.memberapi.domain.member.entity.MemberRole;
 import com.nhnacademy.memberapi.domain.member.entity.MemberState;
 import com.nhnacademy.memberapi.domain.member.repository.MemberRepository;
+import com.nhnacademy.memberapi.domain.point.dto.PointHistoryResponse;
 import com.nhnacademy.memberapi.domain.point.dto.ReviewPointRequest;
 import com.nhnacademy.memberapi.domain.point.entity.PointHistory;
 import com.nhnacademy.memberapi.domain.point.entity.PointPolicy;
@@ -23,7 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,7 +71,7 @@ class PointHistoryServiceTest {
                 .pointPolicyName("Test Policy")
                 .pointPolicyRate(rate)
                 .pointPolicyFixedAmount(amount)
-                .lastModifiedAt(LocalDate.now().atStartOfDay())
+                .lastModifiedAt(LocalDateTime.now())
                 .build();
     }
 
@@ -95,7 +96,6 @@ class PointHistoryServiceTest {
     @Test
     @DisplayName("리뷰 포인트 적립 - 사진 없음(기본)")
     void awardReviewPoints_Base() {
-
         Long memberId = 1L;
         ReviewPointRequest request = new ReviewPointRequest(100L, false);
         Grade mockGrade = mock(Grade.class);
@@ -146,7 +146,7 @@ class PointHistoryServiceTest {
     }
 
     @Test
-    @DisplayName("도서 구매 포인트 적립 (기본 1% + 등급 1% 가정)")
+    @DisplayName("도서 구매 포인트 적립 (기본 1% + 등급 1%)")
     void awardPurchasePoints() {
         Long memberId = 1L;
         Long orderId = 999L;
@@ -157,7 +157,6 @@ class PointHistoryServiceTest {
 
         Member member = createMember(memberId, 0, mockGrade);
 
-        // 도서 적립 정책 (1%)
         PointPolicy bookPolicy = createPolicy(PointPolicyCode.PURCHASE, PointPolicyType.RATE, new BigDecimal("0.01"), null);
 
         given(memberRepository.findById(memberId)).willReturn(Optional.of(member));
@@ -165,11 +164,7 @@ class PointHistoryServiceTest {
 
         pointHistoryService.awardPurchasePoints(memberId, orderId, paymentAmount);
 
-        // 10000 * 0.01 (도서) = 100
-        // 10000 * 0.01 (등급) = 100
-        // 총 200원 적립 예상
         assertThat(member.getMemberPoint()).isEqualTo(200);
-        // 이력이 2번 저장되어야 함 (도서 적립, 등급 적립)
         verify(pointHistoryRepository, times(2)).save(any(PointHistory.class));
     }
 
@@ -178,7 +173,6 @@ class PointHistoryServiceTest {
     void usePoints() {
         Long memberId = 1L;
         Grade mockGrade = mock(Grade.class);
-        // 초기 잔액 1000원 설정
         Member member = createMember(memberId, 1000, mockGrade);
 
         given(memberRepository.findById(memberId)).willReturn(Optional.of(member));
@@ -194,51 +188,69 @@ class PointHistoryServiceTest {
     void usePoints_Insufficient_Fail() {
         Long memberId = 1L;
         Grade mockGrade = mock(Grade.class);
-        // 초기 잔액 100원 설정
         Member member = createMember(memberId, 100, mockGrade);
 
         given(memberRepository.findById(memberId)).willReturn(Optional.of(member));
 
-        // Member 엔티티의 adjustPoint에서 예외 발생
         assertThatThrownBy(() -> pointHistoryService.usePoints(memberId, 55L, 500))
                 .isInstanceOf(InsufficientPointsException.class);
     }
 
-//    @Test
-//    @DisplayName("도서 환불 포인트 회수")
-//    void refundPurchasePoints() {
-//        Long memberId = 1L;
-//        Long orderId = 999L;
-//        Grade mockGrade = mock(Grade.class);
-//        Member member = createMember(memberId, 200, mockGrade);
-//
-//        // 과거 적립 내역 모킹 (100원, 100원 적립되었다고 가정)
-//        PointHistory history1 = PointHistory.builder()
-//                .member(member).pointHistoryPoint(100).pointHistoryReason("적립1").build();
-//        PointHistory history2 = PointHistory.builder()
-//                .member(member).pointHistoryPoint(100).pointHistoryReason("적립2").build();
-//
-//        given(memberRepository.findById(memberId)).willReturn(Optional.of(member));
-//        given(pointHistoryRepository.findAllByMember_MemberIdAndOrderId(memberId, orderId))
-//                .willReturn(List.of(history1, history2));
-//
-//
-//        pointHistoryService.refundPurchasePoints(memberId, orderId);
-//
-//        // 200원 보유 중, 100+100원 차감 -> 0원
-//        assertThat(member.getMemberPoint()).isEqualTo(0);
-//        verify(pointHistoryRepository, times(2)).save(any(PointHistory.class));
-//    }
+    @Test
+    @DisplayName("포인트 내역 조회")
+    void getHistories() {
+        Long memberId = 1L;
+        Grade mockGrade = mock(Grade.class);
+        Member member = createMember(memberId, 1000, mockGrade);
 
-//    @Test
-//    @DisplayName("도서 환불 실패 - 내역 없음")
-//    void refundPurchasePoints_NotFound() {
-//        Grade mockGrade = mock(Grade.class);
-//        given(memberRepository.findById(1L)).willReturn(Optional.of(createMember(1L, 0, mockGrade)));
-//        given(pointHistoryRepository.findAllByMember_MemberIdAndOrderId(1L, 999L))
-//                .willReturn(Collections.emptyList());
-//
-//        assertThatThrownBy(() -> pointHistoryService.refundPurchasePoints(1L, 999L))
-//                .isInstanceOf(PointHistoryNotFoundException.class);
-//    }
+        PointHistory history = PointHistory.builder()
+                .member(member)
+                .pointHistoryReason("테스트")
+                .pointHistoryPoint(100)
+                .currentTotalPoint(1100)
+                .transactionAt(LocalDateTime.now())
+                .build();
+
+        given(pointHistoryRepository.findAllByMember_MemberIdOrderByTransactionAtDesc(memberId))
+                .willReturn(List.of(history));
+
+        List<PointHistoryResponse> responses = pointHistoryService.getHistories(memberId);
+
+        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).amount()).isEqualTo(100);
+    }
+
+    @Test
+    @DisplayName("포인트 환불 (주문 취소/반품)")
+    void refundPurchasePoints() {
+        Long memberId = 1L;
+        Long orderId = 999L;
+        int refundAmount = 5000;
+        Grade mockGrade = mock(Grade.class);
+        Member member = createMember(memberId, 1000, mockGrade);
+
+        given(memberRepository.findById(memberId)).willReturn(Optional.of(member));
+        given(pointHistoryRepository.existsByMember_MemberIdAndOrderId(memberId, orderId)).willReturn(true);
+
+        pointHistoryService.refundPurchasePoints(memberId, orderId, refundAmount);
+
+        assertThat(member.getMemberPoint()).isEqualTo(6000);
+        verify(pointHistoryRepository).save(any(PointHistory.class));
+    }
+
+    @Test
+    @DisplayName("포인트 환불 실패 - 내역 없음")
+    void refundPurchasePoints_NotFound() {
+        Long memberId = 1L;
+        Long orderId = 999L;
+        int refundAmount = 5000;
+        Grade mockGrade = mock(Grade.class);
+        Member member = createMember(memberId, 1000, mockGrade);
+
+        given(memberRepository.findById(memberId)).willReturn(Optional.of(member));
+        given(pointHistoryRepository.existsByMember_MemberIdAndOrderId(memberId, orderId)).willReturn(false);
+
+        assertThatThrownBy(() -> pointHistoryService.refundPurchasePoints(memberId, orderId, refundAmount))
+                .isInstanceOf(PointHistoryNotFoundException.class);
+    }
 }

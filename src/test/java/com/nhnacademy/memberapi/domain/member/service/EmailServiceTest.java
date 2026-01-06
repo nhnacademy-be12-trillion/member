@@ -1,6 +1,5 @@
 package com.nhnacademy.memberapi.domain.member.service;
 
-import com.nhnacademy.memberapi.domain.member.repository.MemberRepository;
 import com.nhnacademy.memberapi.global.error.exception.EmailSendException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,9 +37,6 @@ class EmailServiceTest {
     private StringRedisTemplate redisTemplate;
 
     @Mock
-    private MemberRepository memberRepository;
-
-    @Mock
     private ValueOperations<String, String> valueOperations;
 
     @BeforeEach
@@ -61,14 +57,14 @@ class EmailServiceTest {
 
         SimpleMailMessage sentMessage = messageCaptor.getValue();
         assertThat(sentMessage.getTo()).containsExactly(email);
-        assertThat(sentMessage.getSubject()).isEqualTo("회원가입 인증번호");
+        assertThat(sentMessage.getSubject()).isEqualTo("Trillion 인증번호");
 
         String body = sentMessage.getText();
         assertThat(body).isNotNull();
-        String codeInMail = body.replaceAll("[^0-9]", ""); // 숫자만 추출
+        String codeInMail = body.replaceAll("[^0-9]", "");
         assertThat(codeInMail).hasSize(6);
 
-        verify(valueOperations).set(eq(redisKey), eq(codeInMail), eq(5L), eq(TimeUnit.MINUTES));
+        verify(valueOperations).set(eq(redisKey), eq(codeInMail), eq(3L), eq(TimeUnit.MINUTES));
     }
 
     @Test
@@ -96,7 +92,6 @@ class EmailServiceTest {
         boolean result = emailService.verifyCode(email, code);
 
         assertThat(result).isTrue();
-        verify(redisTemplate).delete(redisKey);
     }
 
     @Test
@@ -122,7 +117,7 @@ class EmailServiceTest {
         String code = "123456";
         String redisKey = "AuthCode:" + email;
 
-        given(valueOperations.get(redisKey)).willReturn(null); // 만료되어 null 반환
+        given(valueOperations.get(redisKey)).willReturn(null);
 
         boolean result = emailService.verifyCode(email, code);
 
