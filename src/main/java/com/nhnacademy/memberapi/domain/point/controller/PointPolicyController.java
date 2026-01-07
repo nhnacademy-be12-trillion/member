@@ -1,5 +1,6 @@
 package com.nhnacademy.memberapi.domain.point.controller;
 
+import com.nhnacademy.memberapi.domain.point.controller.docs.PointPolicyControllerDocs;
 import com.nhnacademy.memberapi.domain.point.dto.PointPolicyUpdateRequest;
 import com.nhnacademy.memberapi.domain.point.dto.PointPolicyResponse;
 import com.nhnacademy.memberapi.domain.point.service.PointPolicyService;
@@ -12,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/members/admin/points/policies")
 @RequiredArgsConstructor
-public class PointPolicyController {
+public class PointPolicyController implements PointPolicyControllerDocs {
 
     private final PointPolicyService pointPolicyService;
 
