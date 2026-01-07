@@ -1,5 +1,6 @@
 package com.nhnacademy.memberapi.domain.address.controller;
 
+import com.nhnacademy.memberapi.domain.address.controller.docs.AddressControllerDocs;
 import com.nhnacademy.memberapi.domain.address.dto.AddressCreateRequest;
 import com.nhnacademy.memberapi.domain.address.dto.AddressResponse;
 import com.nhnacademy.memberapi.domain.address.dto.AddressUpdateRequest;
@@ -15,7 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/members/addresses")
 @RequiredArgsConstructor
-public class AddressController {
+public class AddressController implements AddressControllerDocs {
 
     private final AddressService addressService;
 

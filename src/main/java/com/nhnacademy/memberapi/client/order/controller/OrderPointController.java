@@ -1,5 +1,6 @@
 package com.nhnacademy.memberapi.client.order.controller;
 
+import com.nhnacademy.memberapi.client.order.controller.docs.OrderPointControllerDocs;
 import com.nhnacademy.memberapi.client.order.dto.PointAccumulateRequest;
 import com.nhnacademy.memberapi.client.order.dto.PointUsageRequest;
 import com.nhnacademy.memberapi.client.order.service.OrderPointService;
@@ -14,7 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-public class OrderPointController {
+public class OrderPointController implements OrderPointControllerDocs {
     private final OrderPointService orderPointService;
 
     @PatchMapping("/members/points/use")

@@ -1,5 +1,6 @@
 package com.nhnacademy.memberapi.domain.point.controller;
 
+import com.nhnacademy.memberapi.domain.point.controller.docs.PointControllerDocs;
 import com.nhnacademy.memberapi.domain.point.dto.PointHistoryResponse;
 import com.nhnacademy.memberapi.domain.point.dto.PointUseRequest;
 import com.nhnacademy.memberapi.domain.point.dto.ReviewPointRequest;
@@ -13,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/members/points")
 @RequiredArgsConstructor
-public class PointController {
+public class PointController implements PointControllerDocs {
 
     private final PointHistoryService pointHistoryService;
 

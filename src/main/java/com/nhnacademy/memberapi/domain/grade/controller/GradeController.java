@@ -1,5 +1,6 @@
 package com.nhnacademy.memberapi.domain.grade.controller;
 
+import com.nhnacademy.memberapi.domain.grade.controller.docs.GradeControllerDocs;
 import com.nhnacademy.memberapi.domain.grade.dto.GradeRequest;
 import com.nhnacademy.memberapi.domain.grade.dto.GradeResponse;
 import com.nhnacademy.memberapi.domain.grade.service.GradeService;
@@ -16,7 +17,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members/grades")
-public class GradeController {
+public class GradeController implements GradeControllerDocs {
 
     private final GradeService gradeService;
 

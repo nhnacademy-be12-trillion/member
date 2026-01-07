@@ -1,5 +1,6 @@
 package com.nhnacademy.memberapi.domain.member.controller;
 
+import com.nhnacademy.memberapi.domain.member.controller.docs.MemberControllerDocs;
 import com.nhnacademy.memberapi.domain.member.dto.*;
 import com.nhnacademy.memberapi.domain.member.service.EmailService;
 import com.nhnacademy.memberapi.domain.member.service.MemberService;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members")
-public class MemberController {
+public class MemberController implements MemberControllerDocs {
 
     private final MemberService memberService;
     private final EmailService emailService;
